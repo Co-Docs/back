@@ -11,9 +11,9 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
-    protected ResponseHandler<ResponseEntity<ErrorResponse>> handleException(Exception e) {
+    protected ResponseEntity<ResponseHandler<ErrorResponse>> handleException(Exception e) {
         log.info("예외 발생: {}", e.getMessage());
         ErrorResponse errorResponse = ErrorResponse.of(ErrorCode.TEMPORARY_ERROR);
-        return ResponseHandler.fail(ResponseEntity.ok(errorResponse),e.getMessage());
+        return ResponseEntity.ok(ResponseHandler.fail(errorResponse,e.getMessage()));
     }
 }
