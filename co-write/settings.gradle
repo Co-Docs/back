@@ -1,0 +1,9 @@
+rootProject.name = 'co-write'
+
+include 'global'
+include 'global:snowflake'
+
+include 'core'
+include 'core:user-and-document'
+include 'core:reading-document'
+
