@@ -1,6 +1,7 @@
 package backend.cowrite.entity;
 
 import backend.cowrite.common.BaseEntity;
+import backend.cowrite.common.Role;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -25,8 +26,27 @@ public class User extends BaseEntity {
     private LocalDateTime birth;
     private String email;
     private String phoneNumber;
+    private Role role;
+
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
     @BatchSize(size = 20)
     private List<UserDocument> userDocuments = new ArrayList<>();
+
+    public String roleName() {
+        return role.name();
+    }
+
+    public static User registerUser(Long userId, String username, String password, String nickname, LocalDateTime birth, String email, String phoneNumber){
+        User user = new User();
+        user.userId = userId;
+        user.username = username;
+        user.password = password;
+        user.nickname = nickname;
+        user.birth = birth;
+        user.email = email;
+        user.phoneNumber = phoneNumber;
+        user.role = Role.ROLE_USER;
+        return user;
+    }
 }
