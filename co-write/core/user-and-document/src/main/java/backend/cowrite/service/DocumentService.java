@@ -8,6 +8,7 @@ import backend.cowrite.repository.DocumentRepository;
 import backend.cowrite.service.request.ParticipantsUpdateRequest;
 import backend.cowrite.service.response.DocumentDetailResponse;
 import backend.cowrite.service.response.DocumentPreviewResponse;
+import kuke.board.common.snowflake.Snowflake;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -24,6 +25,7 @@ public class DocumentService {
 
     private final DocumentRepository documentRepository;
     private final UserService userService;
+    private final Snowflake snowflake;
 
     @Transactional(readOnly = true)
     public DocumentPreviewResponse readAll(Long userId, Pageable pageable) {
@@ -35,7 +37,7 @@ public class DocumentService {
     public Long addNewDocument(Long myId, String title, String content, List<String> participantsName) {
         User owner = userService.findById(myId);
         List<User> participants = participantsName.stream().map(userService::findByName).toList();
-        Document document = Document.addNewDocument(title, content, owner, participants);
+        Document document = Document.addNewDocument(snowflake.nextId(), title, content, owner, participants);
         return documentRepository.save(document).getDocumentId();
     }
 

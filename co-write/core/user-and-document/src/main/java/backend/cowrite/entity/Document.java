@@ -28,8 +28,9 @@ public class Document extends BaseEntity {
     private List<UserDocument> userDocuments = new ArrayList<>();
 
     /*새로운 문서 추가 메서드*/
-    public static Document addNewDocument(String title, String content, User owner, List<User> participants){
+    public static Document addNewDocument(Long documentId, String title, String content, User owner, List<User> participants){
         Document newDocs = new Document();
+        newDocs.documentId = documentId;
         newDocs.title = title;
         newDocs.content = content;
         newDocs.addParticipants(owner, participants);
