@@ -26,7 +26,7 @@ public class TokenProvider {
 
     private SecretKey buildSigningKey(String secret) {
         try {
-            return Keys.hmacShaKeyFor(Decoders.BASE64.decode(secret));
+            return Keys.hmacShaKeyFor(Decoders.BASE64URL.decode(secret));
         } catch (IllegalArgumentException notBase64) {
             return Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
         }

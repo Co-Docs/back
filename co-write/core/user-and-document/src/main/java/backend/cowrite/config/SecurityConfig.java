@@ -32,6 +32,7 @@ public class SecurityConfig {
     private final CustomOAuth2UserDetailService customOAuth2UserDetailService;
     private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
     private final OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler;
+    private final HttpCookieOAuth2Auth2AuthorizationRequestRepository httpCookieOAuth2Auth2AuthorizationRequestRepository;
 
 
     @Bean
@@ -46,11 +47,6 @@ public class SecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         return source;
-    }
-
-    @Bean
-    public HttpCookieOAuth2Auth2AuthorizationRequestRepository cookieAuthorizationRequestRepository() {
-        return new HttpCookieOAuth2Auth2AuthorizationRequestRepository();
     }
 
     @Bean
@@ -75,8 +71,8 @@ public class SecurityConfig {
                 )
                 .oauth2Login(oauth -> oauth
                         .authorizationEndpoint(aep -> aep
-                                .baseUri("/api/oauth2/authorize")
-                                .authorizationRequestRepository(cookieAuthorizationRequestRepository()))
+                                .baseUri("/api/oauth2/login")
+                                .authorizationRequestRepository(httpCookieOAuth2Auth2AuthorizationRequestRepository))
                         .redirectionEndpoint(rep -> rep
                                 .baseUri("/api/oauth2/callback/*"))
                         .userInfoEndpoint(uep -> uep.userService(customOAuth2UserDetailService))
@@ -84,7 +80,7 @@ public class SecurityConfig {
                         .failureHandler(oAuth2AuthenticationFailureHandler)
                 );
 
-        http.addFilterAfter(tokenAuthenticationFilter, CorsFilter.class);
+        http.addFilterAfter(tokenAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         http.addFilterAfter(loginFilter(authenticationManager), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }

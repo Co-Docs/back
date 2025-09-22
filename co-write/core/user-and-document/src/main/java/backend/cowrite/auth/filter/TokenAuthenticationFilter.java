@@ -35,7 +35,10 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
             if (StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt)) {
                 String username = tokenProvider.getUsernameFromToken(jwt);
 
+                //todo: 캐시에서 로그인한 사용자 정보 먼저 찾는 로직 추가
+
                 UserDetails userDetails = customUserDetailService.loadUserByUsername(username);
+                //Todo: 캐시에 로그인한 사용자 정보 추가하는 로직 추가
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities());
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
