@@ -1,2 +1,9 @@
-package backend.cowrite.service;public class MailService {
+package backend.cowrite.service;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+@Service
+@RequiredArgsConstructor
+public class MailService {
 }

@@ -2,6 +2,8 @@ package backend.cowrite.entity;
 
 import backend.cowrite.common.BaseEntity;
 import backend.cowrite.common.Role;
+import backend.cowrite.exception.CustomException;
+import backend.cowrite.exception.ErrorCode;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -48,5 +50,19 @@ public class User extends BaseEntity {
         user.phoneNumber = phoneNumber;
         user.role = Role.ROLE_USER;
         return user;
+    }
+
+    public static User registerUser(Long userId, String username, String password, String passwordConfirm, String nickname, LocalDateTime birth, String email, String phoneNumber){
+        if (!password.equals(passwordConfirm)){
+            throw new CustomException(ErrorCode.PASSWORD_CONFIRM_DENIED);
+        }
+        return registerUser(userId, username, password, nickname, birth, email, phoneNumber);
+    }
+
+    public void changePassword(String password, String passwordConfirm) {
+        if (!password.equals(passwordConfirm)){
+            throw new CustomException(ErrorCode.PASSWORD_CONFIRM_DENIED);
+        }
+        this.password = password;
     }
 }
