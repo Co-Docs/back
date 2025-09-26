@@ -1,7 +1,10 @@
 package backend.cowrite.auth.filter;
 
 import backend.cowrite.auth.CustomUserDetailService;
+import backend.cowrite.auth.CustomUserDetails;
 import backend.cowrite.auth.TokenProvider;
+import backend.cowrite.entity.User;
+import backend.cowrite.service.UserService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -27,6 +30,8 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
 
     private final CustomUserDetailService customUserDetailService;
 
+    private final UserService userService;
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         try {
@@ -35,12 +40,17 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
             if (StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt)) {
                 String username = tokenProvider.getUsernameFromToken(jwt);
 
-                //todo: 캐시에서 로그인한 사용자 정보 먼저 찾는 로직 추가
+                User cacheUser = userService.findByUsername(username);
+                CustomUserDetails customUserDetails;
 
-                UserDetails userDetails = customUserDetailService.loadUserByUsername(username);
-                //Todo: 캐시에 로그인한 사용자 정보 추가하는 로직 추가
+                if(cacheUser!=null){
+                    customUserDetails = CustomUserDetails.create(cacheUser);
+                }else {
+                    // 캐시에 정보가 없을 경우 db에서 가져오고 캐시에 추가하는 로직
+                    customUserDetails = customUserDetailService.loadUserByUsername(username);
+                }
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                        userDetails, null, userDetails.getAuthorities());
+                        customUserDetails , null, customUserDetails.getAuthorities());
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);

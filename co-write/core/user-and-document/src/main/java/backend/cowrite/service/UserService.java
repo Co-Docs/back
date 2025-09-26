@@ -7,6 +7,8 @@ import backend.cowrite.repository.UserRepository;
 import kuke.board.common.snowflake.Snowflake;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,11 +42,11 @@ public class UserService {
     }
 
 
-    //Todo:캐시 삭제하는 로직 추가
-    public void logout(Long userId) {
-
+    @CacheEvict(cacheNames = "user", key = "'user:username:' + #username",cacheManager = "userCacheManager")
+    public void logout(String username) {
     }
 
+    @Cacheable(cacheNames = "user", key = "'user:username:' + #username", cacheManager = "userCacheManager")
     public User findByUsername(String username) {
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND, "해당 username의 유저가 존재하지 않습니다:" + username));

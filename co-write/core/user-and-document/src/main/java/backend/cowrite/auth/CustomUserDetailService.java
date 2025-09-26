@@ -4,6 +4,7 @@ import backend.cowrite.entity.User;
 import backend.cowrite.exception.CustomException;
 import backend.cowrite.exception.ErrorCode;
 import backend.cowrite.repository.UserRepository;
+import backend.cowrite.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,12 +17,11 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class CustomUserDetailService implements UserDetailsService {
 
-    private final UserRepository userRepository;
+    private final UserService userService;
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND, "해당 username의 유저가 존재하지 않습니다."));
+    public CustomUserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        User user = userService.findByUsername(username);
         log.debug("로그인 시 customUserDetailService 실행 username ={} user = {}", username, user.getNickname());
         return CustomUserDetails.create(user);
     }
