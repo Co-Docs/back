@@ -41,7 +41,7 @@ public class UserController {
     @GetMapping("/logout")
     public ResponseEntity<ResponseHandler<Void>> logout(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
         log.debug("로그아웃 메서드 실행 유저 정보 = {}", customUserDetails.getUser().toString());
-        userService.logout(customUserDetails.getUser().getUserId());
+        userService.logout(customUserDetails.getUser().getUsername());
         return ResponseEntity.ok(ResponseHandler.success(null));
     }
 
