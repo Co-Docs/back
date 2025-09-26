@@ -1,14 +1,16 @@
 package backend.cowrite.service.request;
 
+import jakarta.validation.constraints.NotNull;
+
 import java.time.LocalDateTime;
 
 public record RegisterRequest(
-        String username,
-        String password,
-        String passwordConfirm,
-        String nickname,
-        LocalDateTime birth,
-        String email,
-        String phoneNumber
+        @NotNull String username,
+        @NotNull String password,
+        @NotNull String passwordConfirm,
+        @NotNull String nickname,
+        @NotNull LocalDateTime birth,
+        @NotNull String email,
+        @NotNull String phoneNumber
 ) {
 }

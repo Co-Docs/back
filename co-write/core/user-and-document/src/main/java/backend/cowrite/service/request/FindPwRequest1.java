@@ -1,7 +1,9 @@
 package backend.cowrite.service.request;
 
+import jakarta.validation.constraints.NotNull;
+
 public record FindPwRequest1(
-        String username,
-        String email
+        @NotNull String username,
+        @NotNull String email
 ) {
 }

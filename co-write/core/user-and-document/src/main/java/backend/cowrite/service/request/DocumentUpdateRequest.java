@@ -1,10 +1,10 @@
 package backend.cowrite.service.request;
 
-import java.util.List;
+import jakarta.validation.constraints.NotNull;
 
 public record DocumentUpdateRequest(
-        String title,
-        String content
+        @NotNull String title,
+        @NotNull String content
 ) {
 }
 
