@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +23,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final Snowflake snowflake;
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @Transactional(readOnly = true)
     public User findById(Long userId) {
@@ -36,7 +38,9 @@ public class UserService {
     }
 
     public Long register(String username, String password, String passwordConfirm, String nickname, LocalDateTime birth, String email, String phoneNumber) {
-        User user = User.registerUser(snowflake.nextId(), username, password, passwordConfirm, nickname, birth, email, phoneNumber);
+        String encodedPassword = bCryptPasswordEncoder.encode(password);
+        String encodedConfirmPassword = bCryptPasswordEncoder.encode(passwordConfirm);
+        User user = User.registerUser(snowflake.nextId(), username, encodedPassword, encodedConfirmPassword, nickname, birth, email, phoneNumber);
         User savedUser = userRepository.save(user);
         return savedUser.getUserId();
     }
