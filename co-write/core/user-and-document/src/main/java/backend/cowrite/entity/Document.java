@@ -1,6 +1,8 @@
 package backend.cowrite.entity;
 
 import backend.cowrite.common.BaseEntity;
+import backend.cowrite.exception.CustomException;
+import backend.cowrite.exception.ErrorCode;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -21,35 +23,37 @@ public class Document extends BaseEntity {
     @Id @Column(name="document_id")
     private Long documentId;
     private String title;
+    private String password;
     private String content;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "document", cascade = CascadeType.PERSIST)
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "document", cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 20)
     private List<UserDocument> userDocuments = new ArrayList<>();
 
     /*새로운 문서 추가 메서드*/
-    public static Document addNewDocument(Long documentId, String title, String content, User owner, List<User> participants){
+    public static Document addNewDocument(Long documentId, String title, String password, User owner, List<User> participants){
         Document newDocs = new Document();
         newDocs.documentId = documentId;
         newDocs.title = title;
-        newDocs.content = content;
+        newDocs.password = password;
         newDocs.addParticipants(owner, participants);
         return newDocs;
     }
 
     public void addParticipants(User owner, List<User> participants) {
+        if(participants.stream().anyMatch(user -> java.util.Objects.equals(user.getUserId(), owner.getUserId()))){
+            throw new CustomException(ErrorCode.OWNER_CANNOT_BE_PARTICIPANT,"문서 생성자는 참가자가 될 수 없습니다.");
+        }
         UserDocument documentOwner = UserDocument.userToUserDocument(owner, this);
-        List<UserDocument> documentUsers = participants.stream().map(user -> UserDocument.userToUserDocument(user, this)).toList();
+        List<UserDocument> documentUsers = new ArrayList<>(participants.stream().map(participant -> UserDocument.userToUserDocument(participant, this)).toList());
         documentUsers.add(documentOwner);
         this.userDocuments.addAll(documentUsers);
     }
 
-    public void addParticipants(List<User> newParticipants) {
+    public void addParticipants(User newParticipant) {
         Set<Long> exists = this.userDocuments.stream().map(ud -> ud.getUser().getUserId()).collect(Collectors.toSet());
-        for (User newParticipant : newParticipants) {
-            if(exists.add(newParticipant.getUserId()))
-                this.userDocuments.add(UserDocument.userToUserDocument(newParticipant, this));
-        }
+        if(exists.add(newParticipant.getUserId()))
+            this.userDocuments.add(UserDocument.userToUserDocument(newParticipant, this));
     }
 
     public void updateDifferences(String title, String content) {
