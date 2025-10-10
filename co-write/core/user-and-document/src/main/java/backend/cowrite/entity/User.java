@@ -28,6 +28,7 @@ public class User extends BaseEntity {
     private LocalDateTime birth;
     private String email;
     private String phoneNumber;
+    @Enumerated(EnumType.STRING)
     private Role role;
 
 
@@ -52,10 +53,13 @@ public class User extends BaseEntity {
         return user;
     }
 
-    public static User registerUser(Long userId, String username, String password, String passwordConfirm, String nickname, LocalDateTime birth, String email, String phoneNumber){
+    public static void checkPasswordConfirm(String password, String passwordConfirm) {
         if (!password.equals(passwordConfirm)){
             throw new CustomException(ErrorCode.PASSWORD_CONFIRM_DENIED);
         }
+    }
+
+    public static User registerUser(Long userId, String username, String password, String passwordConfirm, String nickname, LocalDateTime birth, String email, String phoneNumber){
         return registerUser(userId, username, password, nickname, birth, email, phoneNumber);
     }
 
