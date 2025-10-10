@@ -1,10 +1,8 @@
 package backend.cowrite.service.request;
 
-import jakarta.validation.constraints.NotEmpty;
-
-import java.util.List;
+import jakarta.validation.constraints.NotNull;
 
 public record ParticipantsUpdateRequest(
-        @NotEmpty List<Long> userId
+        @NotNull String username
 ) {
 }
