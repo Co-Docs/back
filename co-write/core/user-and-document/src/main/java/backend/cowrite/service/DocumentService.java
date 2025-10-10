@@ -5,10 +5,10 @@ import backend.cowrite.entity.User;
 import backend.cowrite.exception.CustomException;
 import backend.cowrite.exception.ErrorCode;
 import backend.cowrite.repository.DocumentRepository;
-import backend.cowrite.service.request.ParticipantsUpdateRequest;
 import backend.cowrite.service.response.DocumentDetailResponse;
 import backend.cowrite.service.response.DocumentPreviewResponse;
-import kuke.board.common.snowflake.Snowflake;
+import backend.cowrite.service.response.UserCacheDto;
+import backend.cowrite.common.snowflake.Snowflake;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -34,10 +34,12 @@ public class DocumentService {
     }
 
     @Transactional
-    public Long addNewDocument(Long myId, String title, String content, List<String> participantsName) {
+    public Long addNewDocument(Long myId, String title, String password, List<String> participantsName) {
         User owner = userService.findById(myId);
-        List<User> participants = participantsName.stream().map(userService::findByName).toList();
-        Document document = Document.addNewDocument(snowflake.nextId(), title, content, owner, participants);
+        List<User> participants = participantsName == null ? List.of()
+                : participantsName.stream().map(userService::findByName).toList();
+        Document document = Document.addNewDocument(snowflake.nextId(), title, password, owner, participants);
+        log.info("[DocumentService.addDocument()] id ={}, title = {}, password ={}",document.getDocumentId(), document.getTitle(), document.getPassword());
         return documentRepository.save(document).getDocumentId();
     }
 
@@ -64,11 +66,12 @@ public class DocumentService {
     }
 
     @Transactional
-    public Long updateParticipants(Long documentId, List<Long> newParticipantsIds) {
-        List<User> newParticipants = newParticipantsIds.stream().map(userService::findById).toList();
+    public String updateParticipants(Long documentId, String username) {
+        UserCacheDto userParticipantCache = userService.findByUsername(username);
+        User newParticipant = userService.findById(userParticipantCache.userId());
         Document document = documentRepository.findById(documentId)
                 .orElseThrow(() -> new CustomException(ErrorCode.DOCS_NOT_FOUND, "해당 documentId의 문서 정보가 존재하지 않습니다." + documentId));
-        document.addParticipants(newParticipants);
-        return document.getDocumentId();
+        document.addParticipants(newParticipant);
+        return newParticipant.getNickname();
     }
 }
