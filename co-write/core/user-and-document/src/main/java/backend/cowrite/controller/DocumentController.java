@@ -1,5 +1,6 @@
 package backend.cowrite.controller;
 
+import backend.cowrite.auth.CustomUserDetails;
 import backend.cowrite.common.ResponseHandler;
 import backend.cowrite.service.DocumentService;
 import backend.cowrite.service.request.DocumentRequest;
@@ -11,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -23,16 +25,16 @@ public class DocumentController {
     private final DocumentService documentService;
 
     @GetMapping
-    private ResponseEntity<ResponseHandler<DocumentPreviewResponse>> readAll(/**@AuthenticatinalPrincipal로 바꾸기**/Long userId, Pageable pageable) {
-        log.debug("모든 문서 출력 메서드 실행 pageNumber = {}, pageSize = {}", pageable.getPageNumber(), pageable.getPageSize());
-        DocumentPreviewResponse documentResponse = documentService.readAll(userId, pageable);
+    private ResponseEntity<ResponseHandler<DocumentPreviewResponse>> readAll(@AuthenticationPrincipal CustomUserDetails userDetails, Pageable pageable) {
+        log.info("모든 문서 출력 메서드 실행 pageNumber = {}, pageSize = {}", pageable.getPageNumber(), pageable.getPageSize());
+        DocumentPreviewResponse documentResponse = documentService.readAll(userDetails.getUser().userId(), pageable);
         return ResponseEntity.ok(ResponseHandler.success(documentResponse));
     }
 
     @PostMapping
-    private ResponseEntity<ResponseHandler<Long>> addNewDocument(/**@AuthenticationalPrincipal로 바꾸기**/Long userId, @RequestBody DocumentRequest documentRequest) {
-        log.debug("문서 추가 메서드 실행 documentRequest = {}", documentRequest.toString());
-        Long saveDocsId = documentService.addNewDocument(userId, documentRequest.title(), documentRequest.content(), documentRequest.userDocuments());
+    private ResponseEntity<ResponseHandler<Long>> addNewDocument(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody DocumentRequest documentRequest) {
+        log.info("문서 추가 메서드 실행 documentRequest = {}", documentRequest.toString());
+        Long saveDocsId = documentService.addNewDocument(userDetails.getUser().userId(), documentRequest.title(), documentRequest.password(), documentRequest.userDocuments());
         return ResponseEntity.ok(ResponseHandler.success(saveDocsId));
     }
 
@@ -58,10 +60,10 @@ public class DocumentController {
     }
 
     @PutMapping("/{documentId}")
-    private ResponseEntity<ResponseHandler<Long>> updateParticipants(@PathVariable("documentId") Long documentId, @RequestBody ParticipantsUpdateRequest participantsUpdateRequest) {
+    private ResponseEntity<ResponseHandler<String>> updateParticipants(@PathVariable("documentId") Long documentId, @RequestBody ParticipantsUpdateRequest participantsUpdateRequest) {
         log.debug("문서 참가자 수정 메서드 실행 documentId = {}, participantsUpdateRequest = {}", documentId, participantsUpdateRequest);
-        Long updatedId = documentService.updateParticipants(documentId, participantsUpdateRequest.userId());
-        return ResponseEntity.ok(ResponseHandler.success(updatedId));
+        String userNickname = documentService.updateParticipants(documentId, participantsUpdateRequest.username());
+        return ResponseEntity.ok(ResponseHandler.success(userNickname));
     }
 
 }
