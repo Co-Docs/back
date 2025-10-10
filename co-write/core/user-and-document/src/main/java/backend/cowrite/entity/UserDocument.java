@@ -15,7 +15,7 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class UserDocument extends BaseEntity {
 
-    @Id
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userDocumentId;
 
     @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "document_id", nullable = false)
