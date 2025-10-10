@@ -8,6 +8,7 @@ import backend.cowrite.service.request.FindIdRequest;
 import backend.cowrite.service.request.FindPwRequest1;
 import backend.cowrite.service.request.FindPwRequest2;
 import backend.cowrite.service.request.RegisterRequest;
+import backend.cowrite.service.response.UserCacheDto;
 import backend.cowrite.service.response.UserInfoResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,8 +27,23 @@ public class UserController {
     @GetMapping
     public ResponseEntity<ResponseHandler<UserInfoResponse>> userInfo(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
         log.debug("내 정보 확인 메서드 실행 유저 정보 = {}", customUserDetails.getUser().toString());
-        UserInfoResponse user = UserInfoResponse.of(userService.findById(customUserDetails.getUser().getUserId()));
+        UserInfoResponse user = UserInfoResponse.of(userService.findById(customUserDetails.getUser().userId()));
         return ResponseEntity.ok(ResponseHandler.success(user));
+    }
+
+    @GetMapping("/isDuplicated")
+    public ResponseEntity<ResponseHandler<Boolean>> findByUsername(@RequestParam("username") String username) {
+        log.debug("아이디 중복 확인을 위한 메서드 실행 username = {}", username);
+        UserCacheDto user = userService.findByUsername(username);
+        Boolean flag = user == null;
+        return ResponseEntity.ok(ResponseHandler.success(flag));
+    }
+
+    @GetMapping("/{username}")
+    public ResponseEntity<ResponseHandler<String>> findNicknameByUsername(@PathVariable("username") String username) {
+        log.debug("username으로 유저 닉네임 주는 메서드 실행 username = {}", username);
+        UserCacheDto user = userService.findByUsername(username);
+        return ResponseEntity.ok(ResponseHandler.success(user.nickname()));
     }
 
     @PostMapping("/sign-in")
@@ -41,7 +57,7 @@ public class UserController {
     @GetMapping("/logout")
     public ResponseEntity<ResponseHandler<Void>> logout(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
         log.debug("로그아웃 메서드 실행 유저 정보 = {}", customUserDetails.getUser().toString());
-        userService.logout(customUserDetails.getUser().getUsername());
+        userService.logout(customUserDetails.getUser().username());
         return ResponseEntity.ok(ResponseHandler.success(null));
     }
 
@@ -56,7 +72,7 @@ public class UserController {
     @PatchMapping("/findPw1")
     public ResponseEntity<ResponseHandler<String>> findPw1(@RequestBody FindPwRequest1 findPwRequest) {
         log.debug("비밀번호 찾기 메서드1 실행 findIdRequest = {}", findPwRequest);
-        User user = userService.findByUsername(findPwRequest.username());
+        UserCacheDto user = userService.findByUsername(findPwRequest.username());
         //todo: 메일 보내는 서비스 구현
         return ResponseEntity.ok(ResponseHandler.success("메일로 인증링크를 전송하였습니다."));
     }
