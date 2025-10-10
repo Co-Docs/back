@@ -1,6 +1,6 @@
 package backend.cowrite.config;
 
-import kuke.board.common.snowflake.Snowflake;
+import backend.cowrite.common.snowflake.Snowflake;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
