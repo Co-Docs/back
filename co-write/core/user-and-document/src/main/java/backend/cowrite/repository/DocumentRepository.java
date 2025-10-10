@@ -10,11 +10,11 @@ import java.util.List;
 
 public interface DocumentRepository extends JpaRepository<Document, Long> {
 
-    @Query(value = "select d " +
-            "from Document d " +
-            "where exists (" +
-            "select ud " +
-            "from UserDocument ud " +
-            "where ud.user.userId = :userId )")
+    @Query("""
+        select distinct d
+        from Document d
+        join d.userDocuments ud
+        where ud.user.userId = :userId
+        """)
     List<Document> readAll(@Param("userId") Long userId, Pageable pageable);
 }
