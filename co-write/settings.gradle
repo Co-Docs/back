@@ -2,6 +2,9 @@ rootProject.name = 'co-write'
 
 include 'global'
 include 'global:snowflake'
+include 'global:data-serializer'
+include 'global:event'
+include 'global:outbox-message-relay'
 
 include 'core'
 include 'core:user-and-document'
