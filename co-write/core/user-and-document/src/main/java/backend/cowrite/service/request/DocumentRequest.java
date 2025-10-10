@@ -7,7 +7,7 @@ import java.util.List;
 
 public record DocumentRequest(
         @NotNull String title,
-        @NotNull String content,
+        @NotNull String password,
         @NotEmpty List<String> userDocuments
 ) {
 }
