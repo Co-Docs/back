@@ -1,6 +1,6 @@
 package backend.cowrite.auth;
 
-import backend.cowrite.entity.User;
+import backend.cowrite.service.response.UserCacheDto;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -11,24 +11,24 @@ import java.util.Collections;
 import java.util.Map;
 
 public class CustomUserDetails implements UserDetails, OAuth2User {
-    private final User user;
+    private final UserCacheDto user;
     private Map<String, Object> attributes;
 
-    private CustomUserDetails(User user) {
+    private CustomUserDetails(UserCacheDto user) {
         this.user = user;
     }
 
-    public static CustomUserDetails create(User user) {
+    public static CustomUserDetails create(UserCacheDto user) {
         return new CustomUserDetails(user);
     }
 
-    public static CustomUserDetails create(User user, Map<String, Object> attributes) {
+    public static CustomUserDetails create(UserCacheDto user, Map<String, Object> attributes) {
         CustomUserDetails userPrincipal = CustomUserDetails.create(user);
         userPrincipal.setAttributes(attributes);
         return userPrincipal;
     }
 
-    public User getUser() {
+    public UserCacheDto getUser() {
         return user;
     }
 
@@ -44,21 +44,22 @@ public class CustomUserDetails implements UserDetails, OAuth2User {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.singletonList(new SimpleGrantedAuthority(user.roleName()));
-    }
-
-    @Override
-    public String getName() {
-        return user.getNickname();
+        return Collections.singletonList(new SimpleGrantedAuthority(user.roleName().name()));
     }
 
     @Override
     public String getPassword() {
-        return user.getPassword();
+        return user.password();
     }
 
     @Override
+    public String getName() {
+        return user.nickname();
+    }
+
+
+    @Override
     public String getUsername() {
-        return user.getUsername();
+        return user.username();
     }
 }

@@ -3,7 +3,6 @@ package backend.cowrite.auth.filter;
 import backend.cowrite.auth.CustomUserDetailService;
 import backend.cowrite.auth.CustomUserDetails;
 import backend.cowrite.auth.TokenProvider;
-import backend.cowrite.entity.User;
 import backend.cowrite.service.UserService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -13,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -40,17 +38,10 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
             if (StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt)) {
                 String username = tokenProvider.getUsernameFromToken(jwt);
 
-                User cacheUser = userService.findByUsername(username);
-                CustomUserDetails customUserDetails;
+                CustomUserDetails customUserDetails = customUserDetailService.loadUserByUsername(username);
 
-                if(cacheUser!=null){
-                    customUserDetails = CustomUserDetails.create(cacheUser);
-                }else {
-                    // 캐시에 정보가 없을 경우 db에서 가져오고 캐시에 추가하는 로직
-                    customUserDetails = customUserDetailService.loadUserByUsername(username);
-                }
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                        customUserDetails , null, customUserDetails.getAuthorities());
+                        customUserDetails, null, customUserDetails.getAuthorities());
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);

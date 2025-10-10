@@ -1,13 +1,9 @@
 package backend.cowrite.auth;
 
-import backend.cowrite.entity.User;
-import backend.cowrite.exception.CustomException;
-import backend.cowrite.exception.ErrorCode;
-import backend.cowrite.repository.UserRepository;
 import backend.cowrite.service.UserService;
+import backend.cowrite.service.response.UserCacheDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -21,8 +17,10 @@ public class CustomUserDetailService implements UserDetailsService {
 
     @Override
     public CustomUserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userService.findByUsername(username);
-        log.debug("로그인 시 customUserDetailService 실행 username ={} user = {}", username, user.getNickname());
-        return CustomUserDetails.create(user);
+        UserCacheDto cacheUser = userService.findByUsername(username);
+        log.info("로그인 시 customUserDetailService 실행 username ={} user = {}", username, cacheUser.nickname());
+        log.info("cacheUserId = {}, cacheUserNickname = {}, cacheUserUsername = {}, cacheUserPassword = {}, cacheUserRole = {}",
+                cacheUser.userId(), cacheUser.nickname(), cacheUser.username(), cacheUser.password(), cacheUser.roleName());
+        return CustomUserDetails.create(cacheUser);
     }
 }

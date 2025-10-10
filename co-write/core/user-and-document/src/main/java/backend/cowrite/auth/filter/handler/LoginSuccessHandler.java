@@ -7,6 +7,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
@@ -17,6 +18,7 @@ import java.util.Map;
 
 @RequiredArgsConstructor
 @Component
+@Slf4j
 public class LoginSuccessHandler implements AuthenticationSuccessHandler {
 
     private final TokenProvider tokenProvider;
@@ -26,6 +28,7 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
         String jwt = tokenProvider.createToken(authentication);
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
 
+        log.info("cacheUserNickname = {}, cacheUserUsername = {}", userDetails.getName(), userDetails.getUsername());
         Map<String, Object> responseBody = new HashMap<>();
         responseBody.put("username", userDetails.getUsername());
         responseBody.put("nickname", userDetails.getName());

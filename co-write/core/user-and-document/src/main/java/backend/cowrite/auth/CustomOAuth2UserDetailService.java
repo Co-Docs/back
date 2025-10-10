@@ -2,7 +2,8 @@ package backend.cowrite.auth;
 
 import backend.cowrite.entity.User;
 import backend.cowrite.repository.UserRepository;
-import kuke.board.common.snowflake.Snowflake;
+import backend.cowrite.service.response.UserCacheDto;
+import backend.cowrite.common.snowflake.Snowflake;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
@@ -45,7 +46,7 @@ public class CustomOAuth2UserDetailService extends DefaultOAuth2UserService {
 
         Optional<User> userOptional = userRepository.findByUsername(oAuth2UserInfo.getUsername());
         User user = userOptional.orElseGet(() -> registerNewUser(oAuth2UserInfo));
-        return CustomUserDetails.create(user, oAuth2User.getAttributes());
+        return CustomUserDetails.create(new UserCacheDto(user.getUserId(),user.getUsername(),user.getPassword(),user.getNickname(),user.getRole()), oAuth2User.getAttributes());
     }
 
     private User registerNewUser(OAuth2UserInfo oAuth2UserInfo) {
