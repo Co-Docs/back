@@ -1,8 +1,5 @@
 package backend.cowrite.repository;
 
-import backend.cowrite.common.event.payload.DeleteOperation;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Repository;
@@ -29,34 +26,29 @@ public class DocumentRedisRepository {
         redisTemplate.opsForValue().set(generateContentKey(documentId), content, duration);
     }
 
-    public void createOrUpdateVersion(Long documentId) {
-        redisTemplate.opsForValue().increment(generateVersionKey(documentId));
+    public void createOrUpdateVersion(Long documentId, String version) {
+        redisTemplate.opsForValue().set(generateVersionKey(documentId), version);
     }
 
-    public void appendDeleteOperation(Long documentId, String operation, Long version) {
+    public void createOrUpdateOperation(Long documentId, String operation, Long version) {
         redisTemplate.opsForZSet().add(generateOperationKey(documentId), operation, version);
         removeOldOperations(documentId);
     }
 
     public String readContent(Long documentId) {
-        return redisTemplate.opsForValue().get(generateContentKey(documentId));
+        String content = redisTemplate.opsForValue().get(generateContentKey(documentId));
+        return (content == null) ? "" : content;
     }
 
-    public Long readBaseVersion(Long documentId) {
+    public Long readVersion(Long documentId) {
         String version = redisTemplate.opsForValue().get(generateVersionKey(documentId));
         return (version == null) ? 0L : Long.parseLong(version);
     }
 
-    public List<String> readOperationsByVersion(Long documentId, Long baseVersion, Long newVersion) {
+    public List<String> readOperation(Long documentId, Long baseVersion, Long newVersion) {
         Set<String> operations = redisTemplate.opsForZSet().rangeByScore(generateOperationKey(documentId), baseVersion+NEXT_VERSION_COUNT, newVersion);
-        if(operations == null || operations.isEmpty()) {
-            return List.of();
-        }
+        if(operations == null || operations.isEmpty()) {return List.of();}
         return new ArrayList<>(operations);
-    }
-
-    public void delete(Long articleId) {
-        redisTemplate.delete(generateContentKey(articleId));
     }
 
     private Long getSavedOperationSize(Long documentId) {
