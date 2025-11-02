@@ -1,6 +1,6 @@
 package backend.cowrite.common.event.payload;
 
-public class Operation {
+public class DeleteOperation {
     int targetPosition;
     int operationCount;
 }
