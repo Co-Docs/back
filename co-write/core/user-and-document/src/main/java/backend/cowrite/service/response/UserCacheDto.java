@@ -1,4 +1,4 @@
-package backend.cowrite.publisher.response;
+package backend.cowrite.service.response;
 
 import backend.cowrite.common.Role;
 
