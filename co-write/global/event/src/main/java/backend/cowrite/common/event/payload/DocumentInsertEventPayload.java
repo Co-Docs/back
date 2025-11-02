@@ -6,13 +6,14 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class DocumentUpdatedEventPayload implements EventPayload {
-    private Long documentId;
-    private String title;
-    private String password;
-    private String content;
+public class DocumentInsertEventPayload implements EventPayload {
+    private Long version;
+    private Long operationId;
+    List<InsertOperation> operations;
 }

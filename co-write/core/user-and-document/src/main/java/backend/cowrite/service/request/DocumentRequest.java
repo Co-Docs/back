@@ -1,4 +1,4 @@
-package backend.cowrite.service.request;
+package backend.cowrite.publisher.request;
 
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;

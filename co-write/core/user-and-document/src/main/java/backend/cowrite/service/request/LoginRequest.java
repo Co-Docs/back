@@ -1,4 +1,4 @@
-package backend.cowrite.service.request;
+package backend.cowrite.publisher.request;
 
 public record LoginRequest(
         String username,

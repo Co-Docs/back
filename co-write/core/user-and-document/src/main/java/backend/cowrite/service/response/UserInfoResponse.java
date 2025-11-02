@@ -1,4 +1,4 @@
-package backend.cowrite.service.response;
+package backend.cowrite.publisher.response;
 
 import backend.cowrite.entity.User;
 

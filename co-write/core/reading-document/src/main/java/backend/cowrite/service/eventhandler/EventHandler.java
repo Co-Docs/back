@@ -1,4 +1,4 @@
-package backend.cowrite.service.eventhandler;
+package backend.cowrite.publisher.eventhandler;
 
 
 import backend.cowrite.common.event.Event;
