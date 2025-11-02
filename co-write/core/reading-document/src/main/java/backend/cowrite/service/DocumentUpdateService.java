@@ -15,12 +15,12 @@ import java.util.List;
 public class DocumentUpdateService {
     private final List<EventHandler> eventHandlers;
 
-    public void handleEvent(Event<EventPayload> event) {
+    public void handleEvent(Long documentId, Event<EventPayload> event) {
         EventHandler<EventPayload> eventHandler = findEventHandler(event);
         if(eventHandler == null) {
-            return;
+            throw new IllegalArgumentException("해당하는 이벤트 핸들러를 찾지 못했습니다.");
         }
-        eventHandler.handle(event);
+        eventHandler.handle(documentId, event);
     }
 
     private EventHandler<EventPayload> findEventHandler(Event<EventPayload> event) {

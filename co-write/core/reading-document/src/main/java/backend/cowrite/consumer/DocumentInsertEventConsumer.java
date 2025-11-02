@@ -17,24 +17,25 @@ import static backend.cowrite.config.WebsocketConfig.ClientSubscribeRoute;
 @Component
 @Slf4j
 @RequiredArgsConstructor
-public class DocumentUpdateEventConsumer {
+public class DocumentInsertEventConsumer {
     private final DocumentUpdateService documentUpdateService;
     private final SimpMessagingTemplate messagingTemplate;
 
 
     @KafkaListener(
-            topics = {EventType.Topic.DOCUMENT_UPDATE},
+            topics = {EventType.Topic.INSERT},
             containerFactory = "kafkaListenerContainerFactory"
     )
     public void listen(ConsumerRecord<String, String> outbox, Acknowledgment ack) {
-        String key = outbox.key();
-        String message = outbox.value();
-        log.info("[DocumentUpdateEventConsumer.listen()] key = {}, message = {}", key, message);
-        Event<EventPayload> event = Event.fromJson(message);
+        String stringDocumentId = outbox.key();
+        String stringEvent = outbox.value();
+        log.info("[DocumentInsertEventConsumer.listen()] documentId = {}, message = {}", stringDocumentId, stringEvent);
+        Long documentId = Long.valueOf(stringDocumentId);
+        Event<EventPayload> event = Event.fromJson(stringEvent);
         if (event != null) {
-            documentUpdateService.handleEvent(event);
-            String destination = documentSubscribeRoute(key);
-            messagingTemplate.convertAndSend(destination,message);
+            documentUpdateService.handleEvent(documentId, event);
+            String destination = documentSubscribeRoute(stringDocumentId);
+            messagingTemplate.convertAndSend(destination,stringEvent);
         }
         ack.acknowledge();
     }
