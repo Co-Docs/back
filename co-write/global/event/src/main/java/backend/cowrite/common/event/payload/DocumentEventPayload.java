@@ -9,8 +9,8 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class DocumentDeleteEventPayload implements EventPayload {
+public class DocumentEventPayload implements EventPayload {
     private Long version;
     private Long operationId;
-    List<DeleteOperation> operations;
+    List<Operation> operations;
 }

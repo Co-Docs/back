@@ -1,6 +1,13 @@
 package backend.cowrite.common.event.payload;
 
-public class InsertOperation {
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
+public class InsertOperation implements Operation{
     OperationType type = OperationType.INSERT;
     int targetPosition;
     String insertText;

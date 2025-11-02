@@ -1,6 +1,6 @@
 package backend.cowrite.controller;
 
-import backend.cowrite.common.event.payload.DocumentDeleteEventPayload;
+import backend.cowrite.common.event.payload.DocumentEventPayload;
 import backend.cowrite.publisher.DocumentUpdatePublisher;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
@@ -17,7 +17,7 @@ public class ReadingDocumentController {
     private final DocumentUpdatePublisher documentUpdatePublisher;
 
     @MessageMapping("/{documentId}")
-    public void editDocument(@DestinationVariable Long documentId, @Payload DocumentDeleteEventPayload updateEventPayload) {
+    public void editDocument(@DestinationVariable Long documentId, @Payload DocumentEventPayload updateEventPayload) {
         documentUpdatePublisher.deleteDocument(documentId, updateEventPayload);
     }
 
