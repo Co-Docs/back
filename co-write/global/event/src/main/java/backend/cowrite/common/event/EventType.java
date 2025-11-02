@@ -1,7 +1,7 @@
 package backend.cowrite.common.event;
 
-import backend.cowrite.common.event.payload.DocumentSavedEventPayload;
-import backend.cowrite.common.event.payload.DocumentUpdatedEventPayload;
+import backend.cowrite.common.event.payload.DocumentDeleteEventPayload;
+import backend.cowrite.common.event.payload.DocumentInsertEventPayload;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,14 +11,14 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public enum EventType {
 
-    DOCUMENT_SAVE(DocumentSavedEventPayload.class,Topic.DOCUMENT_SAVE),
-    DOCUMENT_UPDATE(DocumentUpdatedEventPayload.class,Topic.DOCUMENT_UPDATE);
+    DELETE(DocumentDeleteEventPayload.class, Topic.DELETE),
+    INSERT(DocumentInsertEventPayload.class, Topic.INSERT);
 
     private final Class<? extends EventPayload> payloadClass;
     private final String topic;
 
     public static class Topic {
-        public static final String DOCUMENT_UPDATE = "document-update";
-        public static final String DOCUMENT_SAVE = "document-save";
+        public static final String DELETE = "content-delete";
+        public static final String INSERT = "content-insert";
     }
 }
