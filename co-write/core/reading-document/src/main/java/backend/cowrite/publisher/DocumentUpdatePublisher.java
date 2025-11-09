@@ -13,7 +13,7 @@ public class DocumentUpdatePublisher {
     private final OutboxEventPublisher outboxEventPublisher;
 
     @Transactional
-    public void deleteDocument(Long documentId, DocumentEventPayload deleteEventPayload) {
-        outboxEventPublisher.publish(EventType.UPDATE, deleteEventPayload, documentId);
+    public void updateDocument(Long documentId, DocumentEventPayload eventPayloadPayload) {
+        outboxEventPublisher.publish(EventType.UPDATE, eventPayloadPayload, documentId);
     }
 }
