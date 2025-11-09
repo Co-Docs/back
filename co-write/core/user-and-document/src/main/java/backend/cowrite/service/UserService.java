@@ -61,6 +61,12 @@ public class UserService {
         return new UserCacheDto(user.getUserId(), user.getUsername(), user.getPassword(), user.getNickname(), user.getRole());
     }
 
+    @Transactional(readOnly = true)
+    public User findByUsernameNoCache(String username) {
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND, "해당 username의 유저가 존재하지 않습니다:" + username));
+    }
+
 
     public User changePassword(String username, String password, String passwordConfirm) {
         User user = userRepository.findByUsername(username)
