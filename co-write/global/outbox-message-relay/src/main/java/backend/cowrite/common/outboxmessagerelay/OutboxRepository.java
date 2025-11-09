@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public interface OutboxRepository extends JpaRepository<Outbox, Long> {
-    List<Outbox> findAllAndCreatedAtLessThanEqualOrderByCreatedAtAsc(
+    List<Outbox> findAllByCreatedAtLessThanEqualOrderByCreatedAtAsc(
             LocalDateTime from,
             Pageable pageable
     );
