@@ -27,22 +27,6 @@ public class OperatorUtil {
         return operations.stream().map(this::parseOperationUnchecked).toList();
     }
 
-    private Operation parseOperationUnchecked(String json) {
-        try {
-            return objectMapper.readValue(json, Operation.class);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to parse operation: " + json, e);
-        }
-    }
-
-    private String parseOperationUnchecked(Operation json) {
-        try {
-            return objectMapper.writeValueAsString(json);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to parse operation: " + json, e);
-        }
-    }
-
     public String operate(String savedContent, List<Operation> executeOperations) {
         StringBuilder savedContentBuilder = new StringBuilder(savedContent == null ? "" : savedContent);
         for (Operation executeOperation : executeOperations) {
@@ -60,6 +44,22 @@ public class OperatorUtil {
             }
         }
         return savedContentBuilder.toString();
+    }
+
+    private Operation parseOperationUnchecked(String json) {
+        try {
+            return objectMapper.readValue(json, Operation.class);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to parse operation: " + json, e);
+        }
+    }
+
+    private String parseOperationUnchecked(Operation json) {
+        try {
+            return objectMapper.writeValueAsString(json);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to parse operation: " + json, e);
+        }
     }
 
     private int validateIndex(int index, int maxLength) {
