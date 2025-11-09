@@ -34,10 +34,10 @@ public class DocumentService {
     }
 
     @Transactional
-    public Long addNewDocument(Long myId, String title, String password, List<String> participantsName) {
+    public Long addNewDocument(Long myId, String title, String password, List<String> participantsId) {
         User owner = userService.findById(myId);
-        List<User> participants = participantsName == null ? List.of()
-                : participantsName.stream().map(userService::findByName).toList();
+        List<User> participants = participantsId == null ? List.of()
+                : participantsId.stream().map(userService::findByUsernameNoCache).toList();
         Document document = Document.addNewDocument(snowflake.nextId(), title, password, owner, participants);
         log.info("[DocumentService.addDocument()] id ={}, title = {}, password ={}",document.getDocumentId(), document.getTitle(), document.getPassword());
         return documentRepository.save(document).getDocumentId();
