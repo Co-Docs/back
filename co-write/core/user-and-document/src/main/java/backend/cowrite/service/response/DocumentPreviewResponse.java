@@ -8,7 +8,7 @@ public record DocumentPreviewResponse(
     List<DocumentDto> documents
 ) {
 
-    private static record DocumentDto(String title, List<UserDocumentDto> userDocuments){
+    private static record DocumentDto(Long documentId, String title, List<UserDocumentDto> userDocuments){
 
 
     }
@@ -22,7 +22,7 @@ public record DocumentPreviewResponse(
                 documents
                 .stream()
                 .map(document ->
-                        new DocumentDto(document.getTitle(), document.getUserDocuments().stream().map(userDocument -> new UserDocumentDto(userDocument.getUser().getNickname())).toList()))
+                        new DocumentDto(document.getDocumentId(), document.getTitle(), document.getUserDocuments().stream().map(userDocument -> new UserDocumentDto(userDocument.getUser().getNickname())).toList()))
                 .toList());
     }
 }
