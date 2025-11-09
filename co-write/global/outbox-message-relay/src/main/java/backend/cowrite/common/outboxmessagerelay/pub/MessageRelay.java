@@ -57,7 +57,7 @@ public class MessageRelay {
             scheduler = "messageRelayPublishPendingEventExecutor"
     )
     public void publishPendingEvent() {
-        List<Outbox> outboxes = outboxRepository.findAllAndCreatedAtLessThanEqualOrderByCreatedAtAsc(
+        List<Outbox> outboxes = outboxRepository.findAllByCreatedAtLessThanEqualOrderByCreatedAtAsc(
                 LocalDateTime.now().minusSeconds(10),
                 Pageable.ofSize(100)
         );
