@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Outbox {
 
-    @Id @GeneratedValue
+    @Id
     private Long outboxId;
 
     @Enumerated(EnumType.STRING)
