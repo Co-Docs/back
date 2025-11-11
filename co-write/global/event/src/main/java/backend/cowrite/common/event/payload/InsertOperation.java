@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class InsertOperation implements Operation{
-    OperationType type = OperationType.INSERT;
     int targetPosition;
     String insertText;
 }

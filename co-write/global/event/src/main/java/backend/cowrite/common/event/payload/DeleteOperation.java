@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DeleteOperation implements Operation{
-    OperationType type = OperationType.DELETE;
     int targetPosition;
     int operationCount;
 }
