@@ -9,6 +9,7 @@ import backend.cowrite.common.event.payload.Operation;
 import backend.cowrite.repository.DocumentRedisRepository;
 import backend.cowrite.service.OperatorUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
@@ -17,18 +18,29 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class DocumentUpdateEventHandler implements EventHandler<DocumentEventPayload> {
     private final DocumentRedisRepository documentRedisRepository;
     private final OperatorUtil operatorUtil;
+    private static final int VERSION_UPDATE_COUNT = 1;
 
     @Override
     public void handle(Long documentId, Event<DocumentEventPayload> event) {
-        Long newVersion = event.getPayload().getVersion();
+        Long baseVersion  = event.getPayload().getVersion();
+        Long serverVersion = documentRedisRepository.readVersion(documentId);
+        validateVersion(baseVersion, serverVersion);
         List<Operation> newOperations = event.getPayload().getOperations();
-        List<Operation> executeOperation = getOperation(documentId, newVersion, newOperations);
         String savedContent = documentRedisRepository.readContent(documentId);
-        String editedContent = operatorUtil.operate(savedContent, executeOperation);
-        updateChanges(documentId, newVersion, newOperations, editedContent);
+        log.info("savedContent = {}", savedContent);
+        String editedContent = operatorUtil.operate(savedContent, newOperations);
+        log.info("editedContent = {}", editedContent);
+        updateChanges(documentId, serverVersion + VERSION_UPDATE_COUNT , newOperations, editedContent);
+    }
+
+    private static void validateVersion(Long baseVersion, Long serverVersion) {
+        if (!baseVersion.equals(serverVersion)) {
+            throw new IllegalArgumentException("서버 operation 버전과 client operationi 버전이 다릅니다.");
+        }
     }
 
     private void updateChanges(Long documentId, Long newVersion, List<Operation> newOperations, String editedContent) {
@@ -37,12 +49,6 @@ public class DocumentUpdateEventHandler implements EventHandler<DocumentEventPay
             documentRedisRepository.createOrUpdateOperation(documentId, operation, newVersion);
         }
         documentRedisRepository.createOrUpdateContent(documentId, editedContent, Duration.ofHours(5L));
-    }
-
-    private List<Operation> getOperation(Long documentId, Long newVersion, List<Operation> newOperations) {
-        Long baseVersion = documentRedisRepository.readVersion(documentId);
-        List<String> operations = documentRedisRepository.readOperation(documentId, baseVersion, newVersion);
-        return operatorUtil.parseOperation(newOperations, operations);
     }
 
     @Override
