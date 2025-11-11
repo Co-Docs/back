@@ -9,5 +9,4 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
         @JsonSubTypes.Type(value = InsertOperation.class, name = "INSERT")
 })
 public interface Operation {
-    OperationType getType();
 }
