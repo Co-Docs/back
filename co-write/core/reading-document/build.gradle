@@ -5,4 +5,5 @@ dependencies {
     implementation "org.springframework.boot:spring-boot-starter-websocket"
     implementation project(':global:event')
     implementation project(':global:outbox-message-relay')
+    implementation project(':global:data-serializer')
 }
