@@ -1,2 +1,7 @@
-package backend.cowrite.service.dto;public record EditedResult() {
+package backend.cowrite.service.dto;
+
+public record EditedResult(
+        String editedContent,
+        Long version
+) {
 }
