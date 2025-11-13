@@ -1,19 +1,29 @@
-package backend.cowrite.service;
+package backend.cowrite.utils;
 
+import backend.cowrite.common.dataserializer.DataSerializer;
 import backend.cowrite.common.event.payload.DeleteOperation;
 import backend.cowrite.common.event.payload.InsertOperation;
 import backend.cowrite.common.event.payload.Operation;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 @Component
 @RequiredArgsConstructor
 public class OperatorUtil {
+
+    private final OperatorRebaseUtil operatorRebaseUtil;
+
+    public Operation rebaseOperation(Operation newOperation, List<String> executedOperations) {
+        List<Operation> deserializedExecutedOperations = new ArrayList<>();
+        for (String executedOperation : executedOperations) {
+            Operation deserializedOperation = DataSerializer.deserialize(executedOperation, Operation.class);
+            deserializedExecutedOperations.add(deserializedOperation);
+        }
+        return operatorRebaseUtil.rebase(newOperation, deserializedExecutedOperations);
+    }
 
     public String operate(String savedContent, Operation executeOperation) {
         StringBuilder savedContentBuilder = new StringBuilder(savedContent == null ? "" : savedContent);
