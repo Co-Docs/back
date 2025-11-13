@@ -4,6 +4,7 @@ import backend.cowrite.common.event.Event;
 import backend.cowrite.common.event.EventPayload;
 import backend.cowrite.common.event.EventType;
 import backend.cowrite.service.DocumentUpdateService;
+import backend.cowrite.service.dto.EditedResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -33,9 +34,9 @@ public class DocumentUpdateEventConsumer {
         Long documentId = Long.valueOf(stringDocumentId);
         Event<EventPayload> event = Event.fromJson(stringEvent);
         if (event != null) {
-            documentUpdateService.handleEvent(documentId, event);
+            EditedResult editedResult = documentUpdateService.handleEvent(documentId, event);
             String destination = documentSubscribeRoute(stringDocumentId);
-            messagingTemplate.convertAndSend(destination,stringEvent);
+            messagingTemplate.convertAndSend(destination,editedResult);
         }
         ack.acknowledge();
     }
