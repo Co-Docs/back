@@ -1,13 +1,13 @@
 package backend.cowrite.service.eventhandler;
 
+import backend.cowrite.common.dataserializer.DataSerializer;
 import backend.cowrite.common.event.Event;
 import backend.cowrite.common.event.EventType;
-import backend.cowrite.common.event.payload.DeleteOperation;
 import backend.cowrite.common.event.payload.DocumentEventPayload;
-import backend.cowrite.common.event.payload.InsertOperation;
 import backend.cowrite.common.event.payload.Operation;
 import backend.cowrite.repository.DocumentRedisRepository;
-import backend.cowrite.service.OperatorUtil;
+import backend.cowrite.service.dto.EditedResult;
+import backend.cowrite.utils.OperatorUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -23,32 +23,59 @@ public class DocumentUpdateEventHandler implements EventHandler<DocumentEventPay
     private final DocumentRedisRepository documentRedisRepository;
     private final OperatorUtil operatorUtil;
     private static final int VERSION_UPDATE_COUNT = 1;
+    private final Duration CONTENT_TTL = Duration.ofHours(5L);
 
     @Override
-    public void handle(Long documentId, Event<DocumentEventPayload> event) {
-        Long baseVersion  = event.getPayload().getVersion();
+    public EditedResult handle(Long documentId, Event<DocumentEventPayload> event) {
+        Long baseVersion = event.getPayload().getVersion();
         Long serverVersion = documentRedisRepository.readVersion(documentId);
+        Operation newOperation = event.getPayload().getOperation();
         validateVersion(baseVersion, serverVersion);
-        List<Operation> newOperations = event.getPayload().getOperations();
+        if (baseVersion.equals(serverVersion)) {
+            return applyCurrentOperation(documentId, serverVersion, newOperation);
+        } else {
+            return applyRebasedOperation(documentId, baseVersion, serverVersion, newOperation);
+        }
+    }
+
+    private EditedResult applyCurrentOperation(Long documentId, Long serverVersion, Operation newOperation) {
+        String editedContent = editContent(documentId, newOperation);
+        Long newVersion = serverVersion + VERSION_UPDATE_COUNT;
+        updateChanges(documentId, newVersion, newOperation, editedContent);
+        return new EditedResult(editedContent, newVersion);
+    }
+
+    private EditedResult applyRebasedOperation(Long documentId, Long baseVersion, Long serverVersion, Operation newOperation) {
+        Operation rebasedOperation = rebaseOperation(documentId, baseVersion, serverVersion, newOperation);
+        String edited = editContent(documentId, rebasedOperation);
+        Long newVersion = serverVersion + VERSION_UPDATE_COUNT;
+        updateChanges(documentId, newVersion, rebasedOperation, edited);
+        return new EditedResult(edited, newVersion);
+    }
+
+    private Operation rebaseOperation(Long docId, Long baseVersion, Long serverVersion, Operation newOperation) {
+        List<String> executedJson = documentRedisRepository.readOperation(docId, baseVersion, serverVersion);
+        return operatorUtil.rebaseOperation(newOperation, executedJson);
+    }
+
+    private String editContent(Long documentId, Operation executedOperation) {
         String savedContent = documentRedisRepository.readContent(documentId);
         log.info("savedContent = {}", savedContent);
-        String editedContent = operatorUtil.operate(savedContent, newOperations);
+        String editedContent = operatorUtil.operate(savedContent, executedOperation);
         log.info("editedContent = {}", editedContent);
-        updateChanges(documentId, serverVersion + VERSION_UPDATE_COUNT , newOperations, editedContent);
+        return editedContent;
     }
 
     private static void validateVersion(Long baseVersion, Long serverVersion) {
-        if (!baseVersion.equals(serverVersion)) {
-            throw new IllegalArgumentException("서버 operation 버전과 client operationi 버전이 다릅니다.");
+        if (baseVersion > serverVersion) {
+            throw new IllegalArgumentException("baseVersion이 serverVersion보다 큽니다.");
         }
     }
 
-    private void updateChanges(Long documentId, Long newVersion, List<Operation> newOperations, String editedContent) {
-        documentRedisRepository.createOrUpdateVersion(documentId, String.valueOf(newVersion));
-        for (String operation : operatorUtil.parseOperation(newOperations)) {
-            documentRedisRepository.createOrUpdateOperation(documentId, operation, newVersion);
-        }
-        documentRedisRepository.createOrUpdateContent(documentId, editedContent, Duration.ofHours(5L));
+    private void updateChanges(Long docId, Long newVersion, Operation op, String content) {
+        documentRedisRepository.createOrUpdateVersion(docId, String.valueOf(newVersion));
+        documentRedisRepository.createOrUpdateOperation(docId, DataSerializer.serialize(op), newVersion);
+        documentRedisRepository.createOrUpdateContent(docId, content, CONTENT_TTL);
     }
 
     @Override
