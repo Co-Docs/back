@@ -2,6 +2,7 @@ package backend.cowrite.service;
 
 import backend.cowrite.common.event.Event;
 import backend.cowrite.common.event.EventPayload;
+import backend.cowrite.service.dto.EditedResult;
 import backend.cowrite.service.eventhandler.EventHandler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,12 +16,12 @@ import java.util.List;
 public class DocumentUpdateService {
     private final List<EventHandler> eventHandlers;
 
-    public void handleEvent(Long documentId, Event<EventPayload> event) {
+    public EditedResult handleEvent(Long documentId, Event<EventPayload> event) {
         EventHandler<EventPayload> eventHandler = findEventHandler(event);
         if(eventHandler == null) {
             throw new IllegalArgumentException("해당하는 이벤트 핸들러를 찾지 못했습니다.");
         }
-        eventHandler.handle(documentId, event);
+        return eventHandler.handle(documentId, event);
     }
 
     private EventHandler<EventPayload> findEventHandler(Event<EventPayload> event) {
