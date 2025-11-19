@@ -25,15 +25,15 @@ public class DocumentSaveEventHandler implements EventHandler<DocumentSaveEventP
         documentRedisRepository.generateOrUpdateDocumentUpdatedTime(documentId);
         if(isUpdatedTimeReachedThreshold(documentId)){
             String editedContent = event.getPayload().getEditedContent();
+            log.info("[DocumentSaveEventHandler.handle()] editedContent = {}", editedContent);
             documentService.updateDocument(documentId, NO_CHANGE_TITLE, editedContent);
+            reset(documentId);
         }
     }
 
     private boolean isUpdatedTimeReachedThreshold(Long documentId) {
         Long documentUpdatedTimes = documentRedisRepository.getDocumentUpdatedTimes(documentId);
-        boolean flag = THRESHOLD_COUNT <=documentUpdatedTimes;
-        reset(documentId);
-        return flag;
+        return THRESHOLD_COUNT <=documentUpdatedTimes;
     }
 
     private void reset(Long documentId) {
