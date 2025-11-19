@@ -14,7 +14,7 @@ import java.util.List;
 @Slf4j
 public class DocumentSaveService {
 
-    private List<EventHandler> eventHandlers;
+    private final List<EventHandler> eventHandlers;
 
     public void handleEvent(Long documentId, Event<EventPayload> event) {
         EventHandler<EventPayload> eventHandler = findEventHandler(event);
