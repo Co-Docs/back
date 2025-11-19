@@ -1,7 +1,7 @@
 package backend.cowrite.publisher;
 
 import backend.cowrite.common.event.EventType;
-import backend.cowrite.common.event.payload.DocumentEventPayload;
+import backend.cowrite.common.event.payload.DocumentUpdateEventPayload;
 import backend.cowrite.common.outboxmessagerelay.pub.OutboxEventPublisher;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -13,7 +13,7 @@ public class DocumentUpdatePublisher {
     private final OutboxEventPublisher outboxEventPublisher;
 
     @Transactional
-    public void updateDocument(Long documentId, DocumentEventPayload eventPayloadPayload) {
+    public void updateDocument(Long documentId, DocumentUpdateEventPayload eventPayloadPayload) {
         outboxEventPublisher.publish(EventType.UPDATE, eventPayloadPayload, documentId);
     }
 }
