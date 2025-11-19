@@ -3,7 +3,7 @@ package backend.cowrite.service.eventhandler;
 import backend.cowrite.common.dataserializer.DataSerializer;
 import backend.cowrite.common.event.Event;
 import backend.cowrite.common.event.EventType;
-import backend.cowrite.common.event.payload.DocumentEventPayload;
+import backend.cowrite.common.event.payload.DocumentUpdateEventPayload;
 import backend.cowrite.common.event.payload.Operation;
 import backend.cowrite.repository.DocumentRedisRepository;
 import backend.cowrite.service.dto.EditedResult;
@@ -19,14 +19,14 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class DocumentUpdateEventHandler implements EventHandler<DocumentEventPayload> {
+public class DocumentUpdateEventHandler implements EventHandler<DocumentUpdateEventPayload> {
     private final DocumentRedisRepository documentRedisRepository;
     private final OperatorUtil operatorUtil;
     private static final int VERSION_UPDATE_COUNT = 1;
     private final Duration CONTENT_TTL = Duration.ofHours(5L);
 
     @Override
-    public EditedResult handle(Long documentId, Event<DocumentEventPayload> event) {
+    public EditedResult handle(Long documentId, Event<DocumentUpdateEventPayload> event) {
         Long baseVersion = event.getPayload().getVersion();
         Long serverVersion = documentRedisRepository.readVersion(documentId);
         Operation newOperation = event.getPayload().getOperation();
@@ -79,7 +79,7 @@ public class DocumentUpdateEventHandler implements EventHandler<DocumentEventPay
     }
 
     @Override
-    public boolean supports(Event<DocumentEventPayload> event) {
+    public boolean supports(Event<DocumentUpdateEventPayload> event) {
         return EventType.UPDATE == event.getEventType();
     }
 }
