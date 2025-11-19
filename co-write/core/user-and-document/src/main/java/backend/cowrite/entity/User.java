@@ -5,6 +5,7 @@ import backend.cowrite.common.Role;
 import backend.cowrite.exception.CustomException;
 import backend.cowrite.exception.ErrorCode;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -22,11 +23,17 @@ public class User extends BaseEntity {
 
     @Id @Column(name = "user_id")
     private Long userId;
+    @NotNull
     private String username;
+    @NotNull
     private String password;
+    @NotNull
     private String nickname;
+    @NotNull
     private LocalDateTime birth;
+    @NotNull
     private String email;
+    @NotNull
     private String phoneNumber;
     @Enumerated(EnumType.STRING)
     private Role role;

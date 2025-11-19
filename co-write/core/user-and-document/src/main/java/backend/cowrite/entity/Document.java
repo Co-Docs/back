@@ -4,6 +4,7 @@ import backend.cowrite.common.BaseEntity;
 import backend.cowrite.exception.CustomException;
 import backend.cowrite.exception.ErrorCode;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -22,6 +23,7 @@ public class Document extends BaseEntity {
 
     @Id @Column(name="document_id")
     private Long documentId;
+    @NotNull
     private String title;
     private String password;
     private String content;
