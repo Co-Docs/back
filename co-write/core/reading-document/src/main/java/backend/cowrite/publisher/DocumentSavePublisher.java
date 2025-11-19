@@ -18,6 +18,6 @@ public class DocumentSavePublisher {
         DocumentSaveEventPayload documentSaveEventPayload = DocumentSaveEventPayload.builder()
                 .editedContent(editedContent)
                 .build();
-        outboxEventPublisher.publish(EventType.UPDATE, documentSaveEventPayload, documentId);
+        outboxEventPublisher.publish(EventType.SAVE, documentSaveEventPayload, documentId);
     }
 }
