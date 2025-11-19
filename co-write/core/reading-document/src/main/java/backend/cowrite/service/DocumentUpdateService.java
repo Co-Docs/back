@@ -18,9 +18,6 @@ public class DocumentUpdateService {
 
     public EditedResult handleEvent(Long documentId, Event<EventPayload> event) {
         EventHandler<EventPayload> eventHandler = findEventHandler(event);
-        if(eventHandler == null) {
-            throw new IllegalArgumentException("해당하는 이벤트 핸들러를 찾지 못했습니다.");
-        }
         return eventHandler.handle(documentId, event);
     }
 
@@ -28,6 +25,6 @@ public class DocumentUpdateService {
         return eventHandlers.stream()
                 .filter(eventHandler -> eventHandler.supports(event))
                 .findAny()
-                .orElse(null);
+                .orElseThrow(()-> new IllegalArgumentException("해당하는 이벤트 핸들러를 찾지 못했습니다."));
     }
 }
