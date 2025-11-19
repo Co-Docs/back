@@ -21,7 +21,7 @@ public class Outbox {
 
     @Enumerated(EnumType.STRING)
     private EventType eventType;
-    private String payload;
+    private String payload; //eventPayload
     private LocalDateTime createdAt;
     private Long documentId;
 
