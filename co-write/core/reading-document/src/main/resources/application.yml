@@ -5,7 +5,7 @@ spring:
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/article
+    url: jdbc:mysql://localhost:3306/document
     username: root
     password: Abcd123@
 
@@ -15,3 +15,16 @@ spring:
     show-sql: true
     hibernate:
       ddl-auto: none
+
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+
+  kafka:
+    bootstrap-servers: 127.0.0.1:9092
+    consumer:
+      group-id: reading-document-service
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      enable-auto-commit: false

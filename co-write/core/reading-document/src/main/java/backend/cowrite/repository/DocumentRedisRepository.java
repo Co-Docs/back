@@ -18,6 +18,9 @@ public class DocumentRedisRepository {
     private static final String CONTENT_KEY_FORMAT = "document::content::%s";
     private static final String VERSION_KEY_FORMAT = "document::version::%s";
     private static final String OPERATION_KEY_FORMAT = "document::operation::%s";
+    //document::count::{documentId}
+    private static final String DOCUMENT_COUNT_FORMAT = "document::count::%s";
+
     private static final int MAX_OPS = 200;                // 최근 N개만 유지
     private static final int NEXT_VERSION_COUNT = 1;
 
@@ -49,6 +52,24 @@ public class DocumentRedisRepository {
         Set<String> operations = redisTemplate.opsForZSet().rangeByScore(generateOperationKey(documentId), baseVersion+NEXT_VERSION_COUNT, newVersion);
         if(operations == null || operations.isEmpty()) {return List.of();}
         return new ArrayList<>(operations);
+    }
+
+    public void generateOrUpdateDocumentUpdatedTime(Long documentId, Duration ttl) {
+        redisTemplate.opsForValue().increment(generateDocumentCountKey(documentId));
+        redisTemplate.expire(generateDocumentCountKey(documentId), ttl);
+    }
+
+    public Long getDocumentUpdatedTimes(Long documentId) {
+        String times = redisTemplate.opsForValue().get(generateDocumentCountKey(documentId));
+        return times == null ? 0L : Long.parseLong(times);
+    }
+
+    public void resetDocumentUpdatedTimes(Long documentId) {
+        redisTemplate.delete(generateDocumentCountKey(documentId));
+    }
+
+    private String generateDocumentCountKey(Long documentId) {
+        return DOCUMENT_COUNT_FORMAT.formatted(documentId);
     }
 
     private Long getSavedOperationSize(Long documentId) {

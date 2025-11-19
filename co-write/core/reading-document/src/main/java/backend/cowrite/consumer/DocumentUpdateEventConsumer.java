@@ -43,11 +43,6 @@ public class DocumentUpdateEventConsumer {
         EditedResult editedResult = documentUpdateService.handleEvent(documentId, event);
         String destination = documentSubscribeRoute(documentId);
         messagingTemplate.convertAndSend(destination,editedResult);
-        publishSaveEvent(documentId, editedResult);
-    }
-
-    private void publishSaveEvent(Long documentId, EditedResult editedResult) {
-        documentSavePublisher.saveDocument(documentId, editedResult.editedContent());
     }
 
     private String documentSubscribeRoute(Long documentId) {

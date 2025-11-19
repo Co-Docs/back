@@ -15,10 +15,13 @@ import java.util.List;
 @Slf4j
 public class DocumentUpdateService {
     private final List<EventHandler> eventHandlers;
+    private final DocumentUpdateCounter documentUpdateCounter;
 
     public EditedResult handleEvent(Long documentId, Event<EventPayload> event) {
         EventHandler<EventPayload> eventHandler = findEventHandler(event);
-        return eventHandler.handle(documentId, event);
+        EditedResult editedResult = eventHandler.handle(documentId, event);
+        documentUpdateCounter.update(documentId, editedResult.editedContent());
+        return editedResult;
     }
 
     private EventHandler<EventPayload> findEventHandler(Event<EventPayload> event) {
