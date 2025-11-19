@@ -30,6 +30,9 @@ public class DocumentService {
     @Transactional(readOnly = true)
     public DocumentPreviewResponse readAll(Long userId, Pageable pageable) {
         List<Document> documents = documentRepository.readAll(userId, pageable);
+        for (Document document : documents) {
+            log.info("documentId= {}", document.getDocumentId());
+        }
         return DocumentPreviewResponse.of(documents);
     }
 
@@ -40,7 +43,8 @@ public class DocumentService {
                 : participantsId.stream().map(userService::findByUsernameNoCache).toList();
         Document document = Document.addNewDocument(snowflake.nextId(), title, password, owner, participants);
         log.info("[DocumentService.addDocument()] id ={}, title = {}, password ={}",document.getDocumentId(), document.getTitle(), document.getPassword());
-        return documentRepository.save(document).getDocumentId();
+        documentRepository.save(document);
+        return document.getDocumentId();
     }
 
     @Transactional(readOnly = true)
