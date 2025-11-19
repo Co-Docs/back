@@ -13,7 +13,8 @@ public enum ErrorCode {
     DOCS_NOT_FOUND(400, "C_002", "해당하는 문서 정보가 존재하지 않습니다."),
     UNAUTHORIZED_REDIRECT_URI(400, "C_003", "허용되지 않은 리다이렉트 url입니다."),
     PASSWORD_CONFIRM_DENIED(400, "C_004", "비밀번호 확인이 일치하지 않습니다"),
-    OWNER_CANNOT_BE_PARTICIPANT(400,"C_005","문서 생성자는 참가자가 될 수 없습니다.");
+    OWNER_CANNOT_BE_PARTICIPANT(400,"C_005","문서 생성자는 참가자가 될 수 없습니다."),
+    INVALID_METHOD_ARGUMENT(400,"C_006","잘못된 요청 파라미터입니다.");
 
     private final int state;
     private final String code;
