@@ -3,6 +3,7 @@ package backend.cowrite.consumer;
 import backend.cowrite.common.event.Event;
 import backend.cowrite.common.event.EventPayload;
 import backend.cowrite.common.event.EventType;
+import backend.cowrite.publisher.DocumentSavePublisher;
 import backend.cowrite.service.DocumentUpdateService;
 import backend.cowrite.service.dto.EditedResult;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,7 @@ import static backend.cowrite.config.WebsocketConfig.ClientSubscribeRoute;
 public class DocumentUpdateEventConsumer {
     private final DocumentUpdateService documentUpdateService;
     private final SimpMessagingTemplate messagingTemplate;
+    private final DocumentSavePublisher documentSavePublisher;
 
 
     @KafkaListener(
@@ -28,21 +30,28 @@ public class DocumentUpdateEventConsumer {
             containerFactory = "kafkaListenerContainerFactory"
     )
     public void listen(ConsumerRecord<String, String> outbox, Acknowledgment ack) {
-        String stringDocumentId = outbox.key();
-        String stringEvent = outbox.value();
-        log.info("[DocumentUpdateEventConsumer.listen()] documentId = {}, message = {}", stringDocumentId, stringEvent);
-        Long documentId = Long.valueOf(stringDocumentId);
-        Event<EventPayload> event = Event.fromJson(stringEvent);
+        log.info("[DocumentUpdateEventConsumer.listen()] documentId = {}, message = {}", outbox.key(), outbox.value());
+        Long documentId = Long.valueOf(outbox.key());
+        Event<EventPayload> event = Event.fromJson(outbox.value());
         if (event != null) {
-            EditedResult editedResult = documentUpdateService.handleEvent(documentId, event);
-            String destination = documentSubscribeRoute(stringDocumentId);
-            messagingTemplate.convertAndSend(destination,editedResult);
+            processDocumentUpdate(documentId, event);
         }
         ack.acknowledge();
     }
 
-    private String documentSubscribeRoute(String key) {
-        return String.format("%s/%s", ClientSubscribeRoute, key);
+    private void processDocumentUpdate(Long documentId, Event<EventPayload> event) {
+        EditedResult editedResult = documentUpdateService.handleEvent(documentId, event);
+        String destination = documentSubscribeRoute(documentId);
+        messagingTemplate.convertAndSend(destination,editedResult);
+        publishSaveEvent(documentId, editedResult);
+    }
+
+    private void publishSaveEvent(Long documentId, EditedResult editedResult) {
+        documentSavePublisher.saveDocument(documentId, editedResult.editedContent());
+    }
+
+    private String documentSubscribeRoute(Long documentId) {
+        return String.format("%s/%s", ClientSubscribeRoute, documentId);
     }
 
 }
