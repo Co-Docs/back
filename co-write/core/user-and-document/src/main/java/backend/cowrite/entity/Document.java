@@ -59,9 +59,9 @@ public class Document extends BaseEntity {
     }
 
     public void updateDifferences(String title, String content) {
-        if(!this.title.equals(title))
+        if(title!= null && !this.title.equals(title))
             this.title = title;
-        if(!this.content.equals(content))
+        if(this.content == null || !this.content.equals(content))
             this.content = content;
     }
 }
