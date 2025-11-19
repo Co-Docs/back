@@ -1,7 +1,9 @@
 package backend.cowrite.service.request;
 
+import jakarta.validation.constraints.NotNull;
+
 public record LoginRequest(
-        String username,
-        String password
+        @NotNull String username,
+        @NotNull String password
 ) {
 }
