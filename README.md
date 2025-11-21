@@ -12,3 +12,6 @@ Spring Boot + Kafka + Redis + STOMP(WebSocket) 아키텍처를 사용해, 문서
 리베이스: 뒤늦게 도착한 연산을 선행 연산에 맞게 좌표 보정
 
 확장성 고려: Kafka 파티션을 documentId 키로 사용해 순서 보장 & 수평 확장
+
+### 시스템 아키텍처
+<img width="1008" height="545" alt="co-write 시스템 아키텍처 drawio" src="https://github.com/user-attachments/assets/0d82c184-72b0-4044-a278-0dd7aafe9e75" />
