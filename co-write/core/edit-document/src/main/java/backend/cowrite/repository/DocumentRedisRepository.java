@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @Repository
@@ -38,14 +39,15 @@ public class DocumentRedisRepository {
         removeOldOperations(documentId);
     }
 
-    public String readContent(Long documentId) {
-        String content = redisTemplate.opsForValue().get(generateContentKey(documentId));
-        return (content == null) ? "" : content;
+    public Optional<String> readContent(Long documentId) {
+        return Optional.of(
+                redisTemplate.opsForValue().get(generateContentKey(documentId))
+        );
     }
 
-    public Long readVersion(Long documentId) {
+    public Optional<Long> readVersion(Long documentId) {
         String version = redisTemplate.opsForValue().get(generateVersionKey(documentId));
-        return (version == null) ? 0L : Long.parseLong(version);
+        return Optional.of(Long.parseLong(version));
     }
 
     public List<String> readOperation(Long documentId, Long baseVersion, Long newVersion) {
