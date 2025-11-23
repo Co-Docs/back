@@ -8,5 +8,5 @@ include 'global:outbox-message-relay'
 
 include 'core'
 include 'core:user-and-document'
-include 'core:reading-document'
+include 'core:edit-document'
 
