@@ -1,5 +1,6 @@
 package backend.cowrite.service.eventhandler;
 
+import backend.cowrite.client.DocumentClient;
 import backend.cowrite.common.dataserializer.DataSerializer;
 import backend.cowrite.common.event.Event;
 import backend.cowrite.common.event.EventType;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Optional;
 
 
 @Component
@@ -21,6 +23,7 @@ import java.util.List;
 @Slf4j
 public class DocumentUpdateEventHandler implements EventHandler<DocumentUpdateEventPayload> {
     private final DocumentRedisRepository documentRedisRepository;
+    private final DocumentClient documentClient;
     private final OperatorUtil operatorUtil;
     private static final int VERSION_UPDATE_COUNT = 1;
     private final Duration CONTENT_TTL = Duration.ofHours(5L);
@@ -28,7 +31,8 @@ public class DocumentUpdateEventHandler implements EventHandler<DocumentUpdateEv
     @Override
     public EditedResult handle(Long documentId, Event<DocumentUpdateEventPayload> event) {
         Long baseVersion = event.getPayload().getVersion();
-        Long serverVersion = documentRedisRepository.readVersion(documentId);
+        Long serverVersion = documentRedisRepository.readVersion(documentId)
+                .orElse(0L);
         Operation newOperation = event.getPayload().getOperation();
         validateVersion(baseVersion, serverVersion);
         if (baseVersion.equals(serverVersion)) {
@@ -59,11 +63,20 @@ public class DocumentUpdateEventHandler implements EventHandler<DocumentUpdateEv
     }
 
     private String editContent(Long documentId, Operation executedOperation) {
-        String savedContent = documentRedisRepository.readContent(documentId);
-        log.info("savedContent = {}", savedContent);
+        String savedContent = documentRedisRepository.readContent(documentId)
+                .or(()-> fetch(documentId))
+                .orElseThrow(() -> new IllegalArgumentException("문서 내용이 없습니다."));
+       log.info("savedContent = {}", savedContent);
         String editedContent = operatorUtil.operate(savedContent, executedOperation);
         log.info("editedContent = {}", editedContent);
         return editedContent;
+    }
+
+    private Optional<String> fetch(Long documentId) {
+        Optional<String> savedContent = documentClient.readDocument(documentId)
+                .map(DocumentClient.DocumentResponse::getContent);
+        savedContent.ifPresent(content -> documentRedisRepository.createOrUpdateContent(documentId, content, CONTENT_TTL));
+        return savedContent;
     }
 
     private static void validateVersion(Long baseVersion, Long serverVersion) {
