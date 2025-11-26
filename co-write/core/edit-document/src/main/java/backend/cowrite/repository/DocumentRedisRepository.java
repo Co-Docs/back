@@ -40,14 +40,14 @@ public class DocumentRedisRepository {
     }
 
     public Optional<String> readContent(Long documentId) {
-        return Optional.of(
+        return Optional.ofNullable(
                 redisTemplate.opsForValue().get(generateContentKey(documentId))
         );
     }
 
     public Optional<Long> readVersion(Long documentId) {
         String version = redisTemplate.opsForValue().get(generateVersionKey(documentId));
-        return Optional.of(Long.parseLong(version));
+        return Optional.ofNullable(Long.parseLong(version));
     }
 
     public List<String> readOperation(Long documentId, Long baseVersion, Long newVersion) {
