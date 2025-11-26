@@ -12,13 +12,13 @@ import org.springframework.stereotype.Controller;
 @Controller
 @RequiredArgsConstructor
 @Slf4j
-public class ReadingDocumentController {
+public class EditDocumentController {
 
     private final DocumentUpdatePublisher documentUpdatePublisher;
 
     @MessageMapping("/{documentId}")
     public void editDocument(@DestinationVariable Long documentId, @Payload DocumentUpdateEventPayload updateEventPayload) {
-        log.info("[ReadingDocumentController] documentId = {}, updateEventPayloadVersion = {}", documentId, updateEventPayload.getVersion());
+        log.info("[EditDocumentController] documentId = {}, updateEventPayloadVersion = {}", documentId, updateEventPayload.getVersion());
         documentUpdatePublisher.updateDocument(documentId, updateEventPayload);
     }
 
