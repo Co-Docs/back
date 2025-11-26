@@ -6,4 +6,5 @@ dependencies {
     implementation project(':global:event')
     implementation project(':global:outbox-message-relay')
     implementation project(':global:data-serializer')
+    implementation project(':global:response-handler')
 }
