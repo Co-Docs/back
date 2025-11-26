@@ -1,7 +1,7 @@
 package backend.cowrite.controller;
 
 import backend.cowrite.auth.CustomUserDetails;
-import backend.cowrite.common.ResponseHandler;
+import backend.cowrite.common.responsehandler.ResponseHandler;
 import backend.cowrite.entity.User;
 import backend.cowrite.service.UserService;
 import backend.cowrite.service.request.FindIdRequest;
