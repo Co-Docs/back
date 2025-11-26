@@ -5,6 +5,7 @@ include 'global:snowflake'
 include 'global:data-serializer'
 include 'global:event'
 include 'global:outbox-message-relay'
+include 'global:response-handler'
 
 include 'core'
 include 'core:user-and-document'

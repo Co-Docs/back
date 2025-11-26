@@ -1,6 +1,6 @@
 package backend.cowrite.exception;
 
-import backend.cowrite.common.ResponseHandler;
+import backend.cowrite.common.responsehandler.ResponseHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;

@@ -1,7 +1,7 @@
 package backend.cowrite.controller;
 
 import backend.cowrite.auth.CustomUserDetails;
-import backend.cowrite.common.ResponseHandler;
+import backend.cowrite.common.responsehandler.ResponseHandler;
 import backend.cowrite.service.DocumentService;
 import backend.cowrite.service.request.DocumentRequest;
 import backend.cowrite.service.request.DocumentUpdateRequest;

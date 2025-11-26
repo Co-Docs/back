@@ -1,4 +1,4 @@
-package backend.cowrite.common;
+package backend.cowrite.common.responsehandler;
 
 import lombok.Builder;
 import lombok.Data;
