@@ -1,10 +1,12 @@
 package backend.cowrite.client;
 
+import backend.cowrite.common.responsehandler.ResponseHandler;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
@@ -17,7 +19,7 @@ public class DocumentClient {
 
     private RestClient restClient;
 
-    @Value("")
+    @Value("${endpoints.document-service.url}")
     private String documentServiceUrl;
 
     @PostConstruct
@@ -27,11 +29,12 @@ public class DocumentClient {
 
     public Optional<DocumentResponse> readDocument(Long documentId) {
         try {
-            DocumentResponse documentResponse = restClient.get()
-                    .uri("{documentId}", documentId)
+            ResponseHandler<DocumentResponse> documentResponse = restClient.get()
+                    .uri("/api/document/{documentId}", documentId)
                     .retrieve()
-                    .body(DocumentResponse.class);
-            return Optional.of(documentResponse);
+                    .body(new ParameterizedTypeReference<ResponseHandler<DocumentResponse>>() {
+                    });
+            return Optional.of(documentResponse.getData());
         } catch (Exception e) {
             log.error("[DocumentClient.readDocument] documentId = {}", documentId);
             return Optional.empty();
