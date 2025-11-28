@@ -2,6 +2,7 @@ package backend.cowrite.controller;
 
 import backend.cowrite.auth.CustomUserDetails;
 import backend.cowrite.common.responsehandler.ResponseHandler;
+import backend.cowrite.facade.DocumentRedissonLock;
 import backend.cowrite.service.DocumentService;
 import backend.cowrite.service.request.DocumentRequest;
 import backend.cowrite.service.request.DocumentUpdateRequest;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 public class DocumentController {
 
     private final DocumentService documentService;
+    private final DocumentRedissonLock documentRedissonLock;
 
     @GetMapping
     private ResponseEntity<ResponseHandler<DocumentPreviewResponse>> readAll(@AuthenticationPrincipal CustomUserDetails userDetails, Pageable pageable) {
@@ -55,14 +57,14 @@ public class DocumentController {
     @PatchMapping("/{documentId}")
     private ResponseEntity<ResponseHandler<Long>> updateDocument(@PathVariable("documentId") Long documentId, @RequestBody DocumentUpdateRequest documentUpdateRequest) {
         log.debug("문서 내용 수정 메서드 실행 documentId = {}, documentUpdateRequest = {}", documentId, documentUpdateRequest);
-        Long updatedId = documentService.updateDocument(documentId, documentUpdateRequest.title(), documentUpdateRequest.content());
+        Long updatedId = documentRedissonLock.updateDocument(documentId, documentUpdateRequest.title(), documentUpdateRequest.content());
         return ResponseEntity.ok(ResponseHandler.success(updatedId));
     }
 
     @PutMapping("/{documentId}")
     private ResponseEntity<ResponseHandler<String>> updateParticipants(@PathVariable("documentId") Long documentId, @RequestBody ParticipantsUpdateRequest participantsUpdateRequest) {
         log.debug("문서 참가자 수정 메서드 실행 documentId = {}, participantsUpdateRequest = {}", documentId, participantsUpdateRequest);
-        String userNickname = documentService.updateParticipants(documentId, participantsUpdateRequest.username());
+        String userNickname = documentRedissonLock.updateParticipants(documentId, participantsUpdateRequest.username());
         return ResponseEntity.ok(ResponseHandler.success(userNickname));
     }
 
