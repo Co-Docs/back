@@ -65,7 +65,7 @@ public class DocumentUpdateEventHandler implements EventHandler<DocumentUpdateEv
     private String editContent(Long documentId, Operation executedOperation) {
         String savedContent = documentRedisRepository.readContent(documentId)
                 .or(()-> fetch(documentId))
-                .orElseThrow(() -> new IllegalArgumentException("문서 내용이 없습니다."));
+                .orElse("");
        log.info("savedContent = {}", savedContent);
         String editedContent = operatorUtil.operate(savedContent, executedOperation);
         log.info("editedContent = {}", editedContent);
