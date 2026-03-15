@@ -1,5 +1,6 @@
 package backend.cowrite.client;
 
+import backend.cowrite.service.response.DocumentPreviewResponse;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -8,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -17,7 +19,7 @@ public class DocumentClient {
 
     private RestClient restClient;
 
-    @Value("")
+    @Value("${endpoints.document-service.url}")
     private String documentServiceUrl;
 
     @PostConstruct
@@ -25,22 +27,17 @@ public class DocumentClient {
         restClient = RestClient.create(documentServiceUrl);
     }
 
-    public Optional<DocumentResponse> readDocument(Long documentId) {
+    public Optional<DocumentPreviewResponse> readAll(Long userId) {
         try {
-            DocumentResponse documentResponse = restClient.get()
-                    .uri("{documentId}", documentId)
+            DocumentPreviewResponse documentResponse = restClient.get()
+                    .uri("/api/document/", userId)
                     .retrieve()
-                    .body(DocumentResponse.class);
+                    .body(DocumentPreviewResponse.class);
             return Optional.of(documentResponse);
         } catch (Exception e) {
-            log.error("[DocumentClient.readDocument] documentId = {}", documentId);
+            log.error("[DocumentClient.readDocument] userId = {}", userId);
             return Optional.empty();
         }
     }
 
-    @Getter
-    public static class DocumentResponse {
-        private String title;
-        private String content;
-    }
 }
