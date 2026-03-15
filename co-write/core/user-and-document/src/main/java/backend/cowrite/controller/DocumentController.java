@@ -33,6 +33,14 @@ public class DocumentController {
         return ResponseEntity.ok(ResponseHandler.success(documentResponse));
     }
 
+    @GetMapping("/title/{title}")
+    private ResponseEntity<ResponseHandler<DocumentPreviewResponse>> readByTitle(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable("title") String title,
+            Pageable pageable) {
+        log.info("제목으로 문서 검색하는 메서드 실행 pageNumber = {}, pageSize - {}", pageable.getPageNumber(), pageable.getPageSize());
+        DocumentPreviewResponse documentResponse = documentService.findByTitle(userDetails.getUser().userId(),title, pageable);
+        return ResponseEntity.ok(ResponseHandler.success(documentResponse));
+    }
+
     @PostMapping
     private ResponseEntity<ResponseHandler<Long>> addNewDocument(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody DocumentRequest documentRequest) {
         log.info("문서 추가 메서드 실행 documentRequest = {}", documentRequest.toString());

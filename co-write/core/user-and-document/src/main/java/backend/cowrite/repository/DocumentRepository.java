@@ -17,4 +17,12 @@ public interface DocumentRepository extends JpaRepository<Document, Long> {
         where ud.user.userId = :userId
         """)
     List<Document> readAll(@Param("userId") Long userId, Pageable pageable);
+
+    @Query("""
+        select distinct d
+        from Document d
+        join d.userDocuments ud
+        where ud.user.userId = :userId and d.title like :title
+    """)
+    List<Document> findByTitle(@Param("userId") Long userId, @Param("title") String title, Pageable pageable);
 }

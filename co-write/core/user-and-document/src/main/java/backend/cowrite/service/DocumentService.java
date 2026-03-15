@@ -30,8 +30,14 @@ public class DocumentService {
     @Transactional(readOnly = true)
     public DocumentPreviewResponse readAll(Long userId, Pageable pageable) {
         List<Document> documents = documentRepository.readAll(userId, pageable);
-        for (Document document : documents) {
-            log.info("documentId= {}", document.getDocumentId());
+        return DocumentPreviewResponse.of(documents);
+    }
+
+    @Transactional(readOnly = true)
+    public DocumentPreviewResponse findByTitle(Long userId, String title, Pageable pageable) {
+        List<Document> documents = documentRepository.findByTitle(userId, "%"+title+"%", pageable);
+        for(Document doc : documents) {
+            log.info("[DocumentService.findByTitle()] userId = {}, title = {}, docTitle = {}", userId, title, doc.getTitle());
         }
         return DocumentPreviewResponse.of(documents);
     }
