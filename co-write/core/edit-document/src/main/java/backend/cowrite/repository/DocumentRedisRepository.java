@@ -47,8 +47,9 @@ public class DocumentRedisRepository {
 
     public Optional<Long> readVersion(Long documentId) {
         String version = redisTemplate.opsForValue().get(generateVersionKey(documentId));
-        return Optional.ofNullable(Long.parseLong(version));
+        return (version == null) ? Optional.empty() : Optional.of(Long.parseLong(version));
     }
+
 
     public List<String> readOperation(Long documentId, Long baseVersion, Long newVersion) {
         Set<String> operations = redisTemplate.opsForZSet().rangeByScore(generateOperationKey(documentId), baseVersion+NEXT_VERSION_COUNT, newVersion);
