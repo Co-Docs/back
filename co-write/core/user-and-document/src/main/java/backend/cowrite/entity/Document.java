@@ -58,6 +58,12 @@ public class Document extends BaseEntity {
             this.userDocuments.add(UserDocument.userToUserDocument(newParticipant, this));
     }
 
+    public void subtractParticipant(User participant) {
+        userDocuments.removeIf(
+                ud -> ud.getUser().getUserId().equals(participant.getUserId())
+        );
+    }
+
     public void updateDifferences(String title, String content) {
         if(title!= null && !this.title.equals(title))
             this.title = title;

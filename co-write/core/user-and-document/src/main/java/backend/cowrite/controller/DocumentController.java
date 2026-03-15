@@ -48,9 +48,9 @@ public class DocumentController {
     }
 
     @DeleteMapping("/{documentId}")
-    private ResponseEntity<ResponseHandler<Void>> deleteDocument(@PathVariable("documentId") Long documentId) {
+    private ResponseEntity<ResponseHandler<Void>> deleteDocument(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable("documentId") Long documentId) {
         log.debug("문서 삭제 메서드 실행 documentId = {}", documentId);
-        documentService.deleteDocument(documentId);
+        documentService.deleteDocument(userDetails.getUsername(),documentId);
         return ResponseEntity.ok(ResponseHandler.success(null));
     }
 

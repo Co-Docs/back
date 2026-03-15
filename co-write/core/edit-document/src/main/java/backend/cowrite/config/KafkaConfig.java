@@ -37,4 +37,4 @@ public class KafkaConfig {
         FixedBackOff backOff = new FixedBackOff(1000L, 3);
         return new DefaultErrorHandler(recoverer, backOff);
     }
-}   
+}

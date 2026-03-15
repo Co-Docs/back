@@ -62,6 +62,14 @@ public class DocumentService {
     }
 
     @Transactional
+    public void deleteDocument(String username, Long documentId) {
+        Document document = documentRepository.findById(documentId)
+                .orElseThrow(() -> new CustomException(ErrorCode.DOCS_NOT_FOUND, "해당 documentId의 문서 정보가 존재하지 않습니다." + documentId));
+        User user = userService.findByUsernameNoCache(username);
+        document.subtractParticipant(user);
+    }
+
+    @Transactional
     public Long updateDocument(Long documentId, String title, String content) {
         Document document = documentRepository.findById(documentId)
                 .orElseThrow(() -> new CustomException(ErrorCode.DOCS_NOT_FOUND, "해당 documentId의 문서 정보가 존재하지 않습니다." + documentId));
