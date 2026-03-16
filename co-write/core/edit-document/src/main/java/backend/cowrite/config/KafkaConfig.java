@@ -26,6 +26,16 @@ public class KafkaConfig {
     }
 
     @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, String> dlqKafkaListenerContainerFactory(
+            ConsumerFactory<String, String> consumerFactory
+    ) {
+        ConcurrentKafkaListenerContainerFactory<String, String> dlqFactory = new ConcurrentKafkaListenerContainerFactory<>();
+        dlqFactory.setConsumerFactory(consumerFactory);
+        dlqFactory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL);
+        return dlqFactory;
+    }
+
+    @Bean
     public DefaultErrorHandler errorHandler(KafkaTemplate<String,String> template) {
         DeadLetterPublishingRecoverer recoverer =
                 new DeadLetterPublishingRecoverer(template,

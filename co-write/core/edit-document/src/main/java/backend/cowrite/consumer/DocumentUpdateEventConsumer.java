@@ -40,9 +40,14 @@ public class DocumentUpdateEventConsumer {
     }
 
     private void processDocumentUpdate(Long documentId, Event<EventPayload> event) {
-        EditedResult editedResult = documentUpdateService.handleEvent(documentId, event);
-        String destination = documentSubscribeRoute(documentId);
-        messagingTemplate.convertAndSend(destination,editedResult);
+        try {
+            EditedResult editedResult = documentUpdateService.handleEvent(documentId, event);
+            String destination = documentSubscribeRoute(documentId);
+            messagingTemplate.convertAndSend(destination, editedResult);
+        } catch (IllegalArgumentException e) {
+            log.error("[DocumentUpdateEventConsumer] 복구 불가 에러 - documentId={}, error={}",
+                    documentId, e.getMessage());
+        }
     }
 
     private String documentSubscribeRoute(Long documentId) {
