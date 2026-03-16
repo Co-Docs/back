@@ -26,6 +26,8 @@ public class Document extends BaseEntity {
     @NotNull
     private String title;
     private String password;
+    @Lob
+    @Column(columnDefinition = "LONGTEXT")
     private String content;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "document", cascade = CascadeType.ALL, orphanRemoval = true)
