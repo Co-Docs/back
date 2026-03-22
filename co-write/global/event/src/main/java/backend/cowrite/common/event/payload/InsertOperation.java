@@ -10,4 +10,5 @@ import lombok.NoArgsConstructor;
 public class InsertOperation implements Operation{
     int targetPosition;
     String insertText;
+    String sessionId;
 }

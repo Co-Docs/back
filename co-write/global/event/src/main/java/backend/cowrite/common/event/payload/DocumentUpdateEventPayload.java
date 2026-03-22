@@ -9,6 +9,6 @@ import lombok.*;
 @AllArgsConstructor
 public class DocumentUpdateEventPayload implements EventPayload {
     private Long version;
-    private Long operationId;
+    private String operationId;
     Operation operation;
 }
