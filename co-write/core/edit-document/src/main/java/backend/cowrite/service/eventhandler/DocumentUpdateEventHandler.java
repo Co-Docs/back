@@ -4,7 +4,9 @@ import backend.cowrite.client.DocumentClient;
 import backend.cowrite.common.dataserializer.DataSerializer;
 import backend.cowrite.common.event.Event;
 import backend.cowrite.common.event.EventType;
+import backend.cowrite.common.event.payload.DeleteOperation;
 import backend.cowrite.common.event.payload.DocumentUpdateEventPayload;
+import backend.cowrite.common.event.payload.InsertOperation;
 import backend.cowrite.common.event.payload.Operation;
 import backend.cowrite.repository.DocumentRedisRepository;
 import backend.cowrite.service.dto.EditedResult;
@@ -34,27 +36,29 @@ public class DocumentUpdateEventHandler implements EventHandler<DocumentUpdateEv
         Long serverVersion = documentRedisRepository.readVersion(documentId)
                 .orElse(0L);
         Operation newOperation = event.getPayload().getOperation();
+        String operationId = event.getPayload().getOperationId();
         validateVersion(baseVersion, serverVersion);
         if (baseVersion.equals(serverVersion)) {
-            return applyCurrentOperation(documentId, serverVersion, newOperation);
+            return applyCurrentOperation(documentId, serverVersion, newOperation, operationId);
         } else {
-            return applyRebasedOperation(documentId, baseVersion, serverVersion, newOperation);
+            return applyRebasedOperation(documentId, baseVersion, serverVersion, newOperation, operationId);
         }
     }
 
-    private EditedResult applyCurrentOperation(Long documentId, Long serverVersion, Operation newOperation) {
+    private EditedResult applyCurrentOperation(Long documentId, Long serverVersion, Operation newOperation, String operationId) {
         String editedContent = editContent(documentId, newOperation);
         Long newVersion = serverVersion + VERSION_UPDATE_COUNT;
         updateChanges(documentId, newVersion, newOperation, editedContent);
-        return new EditedResult(editedContent, newVersion);
+
+        return new EditedResult(editedContent, newVersion, extractPosition(newOperation), operationId);
     }
 
-    private EditedResult applyRebasedOperation(Long documentId, Long baseVersion, Long serverVersion, Operation newOperation) {
+    private EditedResult applyRebasedOperation(Long documentId, Long baseVersion, Long serverVersion, Operation newOperation, String operationId) {
         Operation rebasedOperation = rebaseOperation(documentId, baseVersion, serverVersion, newOperation);
         String edited = editContent(documentId, rebasedOperation);
         Long newVersion = serverVersion + VERSION_UPDATE_COUNT;
         updateChanges(documentId, newVersion, rebasedOperation, edited);
-        return new EditedResult(edited, newVersion);
+        return new EditedResult(edited, newVersion, extractPosition(rebasedOperation), operationId);
     }
 
     private Operation rebaseOperation(Long docId, Long baseVersion, Long serverVersion, Operation newOperation) {
@@ -89,6 +93,12 @@ public class DocumentUpdateEventHandler implements EventHandler<DocumentUpdateEv
         documentRedisRepository.createOrUpdateVersion(docId, String.valueOf(newVersion));
         documentRedisRepository.createOrUpdateOperation(docId, DataSerializer.serialize(op), newVersion);
         documentRedisRepository.createOrUpdateContent(docId, content, CONTENT_TTL);
+    }
+
+    private int extractPosition(Operation operation) {
+        if (operation instanceof InsertOperation iop) return iop.getTargetPosition();
+        if (operation instanceof DeleteOperation dop) return dop.getTargetPosition();
+        return 0;
     }
 
     @Override
