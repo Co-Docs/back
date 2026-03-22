@@ -42,8 +42,14 @@ public class OperatorRebaseUtil {
         int q = nz(mine.getTargetPosition());
         int p = nz(other.getTargetPosition());
         int L = len(other.getInsertText());
-        if (q >= p) q += L;
-        return new InsertOperation(q, nzs(mine.getInsertText()));
+        if (q > p) {
+            q += L;
+        } else if(q==p) {
+            if (mine.getSessionId().compareTo(other.getSessionId()) > 0) {
+                q += L;
+            }
+        }
+        return new InsertOperation(q, nzs(mine.getInsertText()), mine.getSessionId());
     }
 
     private Operation rebaseInsertAgainstDelete(InsertOperation mine, DeleteOperation other) {
@@ -55,7 +61,7 @@ public class OperatorRebaseUtil {
         } else if (q >= p) {
             q = p;
         }
-        return new InsertOperation(q, nzs(mine.getInsertText()));
+        return new InsertOperation(q, nzs(mine.getInsertText()), mine.getSessionId());
     }
 
     private Operation rebaseDeleteAgainstInsert(DeleteOperation mine, InsertOperation other) {
@@ -107,7 +113,7 @@ public class OperatorRebaseUtil {
 
     private Operation copyOf(Operation op) {
         if (op instanceof InsertOperation ins) {
-            return new InsertOperation(nz(ins.getTargetPosition()), nzs(ins.getInsertText()));
+            return new InsertOperation(nz(ins.getTargetPosition()), nzs(ins.getInsertText()), ins.getSessionId());
         } else if (op instanceof DeleteOperation del) {
             return new DeleteOperation(nz(del.getTargetPosition()), Math.max(0, del.getOperationCount()));
         }
