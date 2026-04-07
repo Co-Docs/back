@@ -83,7 +83,7 @@ public class DocumentRedisRepository {
         long savedOperationSize = getSavedOperationSize(documentId);
         if (savedOperationSize > MAX_OPS) {
             long removeIndex = savedOperationSize - MAX_OPS;
-            redisTemplate.opsForZSet().removeRange(generateOperationKey(documentId), 0, removeIndex);
+            redisTemplate.opsForZSet().removeRange(generateOperationKey(documentId), 0, removeIndex-1);
         }
     }
 

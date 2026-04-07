@@ -32,7 +32,7 @@ public class OperatorUtil {
             String text = insertOperation.getInsertText() == null ? "" : insertOperation.getInsertText();
             savedContentBuilder.insert(pos, text);
         } else if (executeOperation instanceof DeleteOperation deleteOperation) {
-            int start = validateIndex(deleteOperation.getTargetPosition(), savedContentBuilder.length() - 1);
+            int start = validateIndex(deleteOperation.getTargetPosition(), savedContentBuilder.length());
             int count = Math.max(0, deleteOperation.getOperationCount());
             int end = Math.min(start + count, savedContentBuilder.length()); // exclusive
             if (start < end) {
