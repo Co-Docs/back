@@ -1,0 +1,151 @@
+# config-template.yml
+#
+# COMMITTED PLACEHOLDER template for the spec-kit-jira-sync bridge binding.
+#
+# An operator copies this file to the GITIGNORED resolved location
+#   .specify/extensions/jira/jira-config.yml
+# and replaces every placeholder below with the real ids read off their own
+# Jira project. The resolved copy is gitignored (see .gitignore); THIS template,
+# with placeholders only, is the only config committed to the tree.
+#
+# Privacy (Principle IX): every value here is a neutral placeholder — a fake
+# project key and made-up numeric ids. NO real Jira coordinates, site, account
+# ids, UUIDs, or tokens may EVER appear in this committed file; the privacy
+# guard (tests/unit/no-real-identifiers.bats) scans the tracked tree and gates
+# CI. Real values live ONLY in the gitignored .env / jira-config.yml.
+#
+# Credentials are NOT configured here. The Jira Basic-auth token + email live
+# only in the gitignored .env (JIRA_BASE_URL / JIRA_EMAIL / JIRA_API_TOKEN);
+# config.sh never reads secrets.
+#
+# Shape mirrors exactly what src/config.sh `config::validate` requires
+# (data-model.md § 2). Auto-discovery of these ids by the seed/install step is a
+# later feature; for now you fill them in by hand (or read them off the project
+# via the Atlassian MCP). See specs/001-core-bridge/dogfood.md.
+jira:
+  # The project key (the short prefix in every issue key, e.g. PROJ-123).
+  # Find it in Project settings -> Details, or in any issue key in the project.
+  project_key: "PROJ"
+
+  # Issue-type ids for the three projections the sink creates: an Epic per repo,
+  # a Story per spec, a Subtask per task phase. Numeric ids, NOT names.
+  # Obtain them from the project's issue types: Project settings -> Issue types
+  # (the id is in the URL when you open an issue type), or via the Atlassian MCP
+  # getJiraProjectIssueTypesMetadata for the project.
+  issue_types:
+    epic: "10001"
+    story: "10002"
+    subtask: "10003"
+    # Optional, only needed when a `mapping:` level projects to these types.
+    # A Task-projected level (e.g. task -> Task instead of the default
+    # checklist) requires `task`; an enabled initiative super-level requires
+    # `initiative`. Leave commented out when using the zero-config default
+    # (repo->Epic, spec->Story, phase->Subtask, task->checklist).
+    # task: "10004"
+    # initiative: "10005"
+
+  # Lifecycle phase -> target Jira status id. The sink drives a Story to the
+  # mapped status via a transition POST as the disk lifecycle advances. These
+  # are status ids, NOT names. Obtain them from the project's workflow: Project
+  # settings -> Workflows (open the workflow; each status has a numeric id), or
+  # via the Atlassian MCP. All six phases are REQUIRED.
+  phase_status:
+    specifying: "20001"
+    planning: "20002"
+    tasking: "20003"
+    implementing: "20004"
+    ready_to_merge: "20005"
+    merged: "20006"
+
+  # Optional explicit transition ids, keyed by lifecycle phase. Leave as the
+  # empty map `{}` to let the sink resolve the matching transition by target
+  # status at write time (the common case). Pin a phase here only when the
+  # workflow has more than one transition reaching the same status. Obtain a
+  # transition id from an issue's available transitions (GET
+  # /rest/api/3/issue/{key}/transitions, or the Atlassian MCP
+  # getTransitionsForJiraIssue). Example of a pinned phase:
+  #   implementing: "30004"
+  transitions: {}
+
+  # Label prefixes the sink applies to carry idempotency identity onto Jira.
+  # These are operator-chosen strings (re-prefix without code changes), not ids:
+  #   spec_prefix      one Story per spec      -> speckit-spec:NNN
+  #   repo_prefix      one Epic per repo       -> speckit-repo:<slug>
+  #   phase_prefix     one Subtask per phase   -> task-phase:N
+  #   lifecycle_prefix the disk lifecycle      -> phase:<token>
+  labels:
+    spec_prefix: "speckit-spec:"
+    repo_prefix: "speckit-repo:"
+    phase_prefix: "task-phase:"
+    lifecycle_prefix: "phase:"
+    # Identity label prefix for a Task-projected level (when `task` does NOT
+    # map to the default `checklist`). Used to match/update by identity on
+    # re-run so configured Task levels stay idempotent (feature-002, Q9).
+    task_prefix: "speckit-task:"
+
+  # OPTIONAL re-mode / orphan pruning (feature-004). Governs ONLY the explicit
+  # `reconcile.sh --remode` destructive operation; the ordinary reconcile never
+  # prunes. The whole block is optional — absent => `destruction: hard-delete`.
+  # Re-mode removes bridge-owned (speckit-*-labelled) artifacts the current
+  # mapping no longer projects; it NEVER touches operator-created issues.
+  remode:
+    # destruction model for pruned orphans:
+    #   hard-delete  DELETE the issue (default — bridge content is regenerable
+    #                from the specs, so no backup is needed; comments/links lost)
+    #   archive      preserve the human layer: transition the issue to
+    #                `archive_status` AND strip its identity labels (so it leaves
+    #                the bridge-owned set). Requires `archive_status` below.
+    destruction: hard-delete
+    # Status id the `archive` model transitions orphans to (an id, never a
+    # display name — Principle V). Required ONLY when destruction == archive.
+    # archive_status: "10010"
+
+  # OPTIONAL configurable artifact mapping (feature-002). The whole `mapping:`
+  # block is optional: when ABSENT the loader synthesizes today's default
+  # (repo->Epic, spec->Story, phase->Subtask, task->checklist, initiative and
+  # status_rollup OFF) from the keys above, so a pre-feature config upgrades
+  # byte-for-byte unchanged. Spell a level out only to override it; an
+  # unspecified level inherits the default. See
+  # specs/002-configurable-mapping/contracts/mapping-config.md.
+  mapping:
+    # Optional narrative super-level above the repo Epic. OFF by default.
+    # When the instance lacks the Initiative type, `on_absent: degrade` folds
+    # the narrative onto the Epic with a repo-grouping label (never hard-fails).
+    # The narrative is read ONLY from the explicit spec.md "Input:" line
+    # (source: spec_input) — never inferred.
+    initiative:
+      enabled: false
+      artifact: "Initiative"
+      on_absent: "degrade"
+      source: "spec_input"
+
+    # Parent-linking style: team-managed uses the native `parent` field;
+    # classic projects use the Epic-link. team-managed | classic.
+    project_style: "team-managed"
+
+    # Per-level artifact + relationship to its parent. `artifact` is a Jira
+    # issue-type NAME (validated against the project's available types at
+    # config-load) or the non-issue `checklist` sentinel.
+    # `relationship_to_parent` is one of: parent | Epic-link | none |
+    # checklist. An optional per-level
+    # `on_absent: "<type>"` names a fallback issue type to use when the primary
+    # `artifact` is not available in the target project (the only escape from
+    # the fail-closed absent-type error).
+    levels:
+      repo: { artifact: "Epic", relationship_to_parent: "none" }
+      spec: { artifact: "Story", relationship_to_parent: "parent" }
+      phase: { artifact: "Subtask", relationship_to_parent: "parent" }
+      task: { artifact: "checklist", relationship_to_parent: "checklist" }
+
+    # Optional status rollup. OFF by default. When ON, a phase whose tasks are
+    # all complete transitions to done, and a repo whose specs are all done
+    # transitions its top issue to done (idempotent: transition only on a real
+    # completion-state change).
+    status_rollup:
+      enabled: false
+
+# NOTE on story points: the standard Jira Software story-points custom field is
+# `jsw-story-points`. The bridge does not require a story-points id in this
+# template today; when a later feature needs it, the seed/install step captures
+# that custom-field id at resolution time and writes it here (Principle IX: no
+# name-fallback at runtime).
